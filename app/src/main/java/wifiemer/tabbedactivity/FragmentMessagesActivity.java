@@ -16,6 +16,8 @@ public class FragmentMessagesActivity extends Fragment {
     public static FragmentMessagesActivity newInstance() {
         FragmentMessagesActivity fragment = new FragmentMessagesActivity();
         // Heightened Engineering
+
+        // Heightened Science
         return fragment;
     }
 
