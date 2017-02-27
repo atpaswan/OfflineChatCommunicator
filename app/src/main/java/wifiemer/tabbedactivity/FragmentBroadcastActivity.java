@@ -14,7 +14,7 @@ public class FragmentBroadcastActivity extends Fragment{
 
     public static FragmentBroadcastActivity newInstance() {
         FragmentBroadcastActivity fragment = new FragmentBroadcastActivity();
-
+        System.out.println("My first git change. Hurray");
         return fragment;
     }
 
