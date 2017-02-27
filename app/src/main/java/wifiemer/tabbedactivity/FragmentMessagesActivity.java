@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 /**
@@ -27,7 +29,14 @@ public class FragmentMessagesActivity extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_tab1messages, container, false);
         TextView textView = (TextView) rootView.findViewById(R.id.textView1);
 
-        textView.setText("This is the section for the Messages");
+        ListView listView=(ListView)rootView.findViewById(R.id.listView);
+        String[] strings1={"Lauda","Lahsun","Greater","Chutiyapa","Bhosdika"};
+
+        ArrayAdapter<String> adapter=new ArrayAdapter<String>(this.getContext(),R.layout.list_item,strings1);
+
+        listView.setAdapter(adapter);
+
+
 
         return rootView;
     }
