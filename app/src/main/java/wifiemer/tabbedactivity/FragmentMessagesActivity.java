@@ -23,7 +23,7 @@ import java.util.List;
 public class FragmentMessagesActivity extends Fragment {
 
 
-    List<WifiMessage> wifiMessages;
+    ArrayList<WifiMessage> wifiMessages;
     LayoutInflater inflater;
     public static FragmentMessagesActivity newInstance() {
         FragmentMessagesActivity fragment = new FragmentMessagesActivity();
@@ -94,9 +94,9 @@ public class FragmentMessagesActivity extends Fragment {
 
 
 private class WifiMessageAdapter extends ArrayAdapter<WifiMessage> {
-    List<WifiMessage> wifiMessages;
+    ArrayList<WifiMessage> wifiMessages;
 
-    public WifiMessageAdapter(Context context, int position, List<WifiMessage> wifiMessages) {
+    public WifiMessageAdapter(Context context, int position, ArrayList<WifiMessage> wifiMessages) {
         super(context, R.layout.list_item, wifiMessages);
         this.wifiMessages = wifiMessages;
     }
