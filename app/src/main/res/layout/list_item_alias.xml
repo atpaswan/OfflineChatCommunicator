@@ -16,8 +16,8 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Wifi BroadCastID or Wifi Alias"
-        android:id="@+id/WifiName"
+        android:text="Wifi BroadCastID"
+        android:id="@+id/wifiBroadCastID"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginLeft="190sp"
@@ -29,9 +29,9 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Last message received from Wifi Broadcast ID"
-        android:id="@+id/LastMessage"
-        android:layout_below="@+id/WifiName"
+        android:text="Wifi Alias"
+        android:id="@+id/wifiAlias"
+        android:layout_below="@+id/wifiBroadCastID"
         android:layout_toRightOf="@+id/imageView"
         android:layout_toEndOf="@+id/imageView"
         android:layout_marginLeft="40sp"
