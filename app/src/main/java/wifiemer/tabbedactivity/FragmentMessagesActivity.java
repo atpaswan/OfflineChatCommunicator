@@ -1,6 +1,14 @@
 package wifiemer.tabbedactivity;
 
+import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -14,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,8 +32,12 @@ import java.util.List;
 public class FragmentMessagesActivity extends Fragment {
 
 
-    ArrayList<WifiMessage> wifiMessages;
+    List<WifiMessage> wifiMessages=new ArrayList<WifiMessage>();
     LayoutInflater inflater;
+    WifiManager wifiManager;
+    View rootView;
+    boolean permissiongrant=true;
+
     public static FragmentMessagesActivity newInstance() {
         FragmentMessagesActivity fragment = new FragmentMessagesActivity();
         // Heightened Engineering
@@ -37,10 +50,10 @@ public class FragmentMessagesActivity extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        this.inflater=inflater;
-        View rootView = inflater.inflate(R.layout.fragment_tab1messages, container, false);
-        populateWifiMessageList();
-        populateListView(rootView);
+         this.inflater=inflater;
+         rootView = inflater.inflate(R.layout.fragment_tab1messages, container, false);
+         populateWifiMessageList();
+
       //  registerClickListener(rootView);
 
 
@@ -61,23 +74,22 @@ public class FragmentMessagesActivity extends Fragment {
 
     public void populateWifiMessageList()
     {
-        wifiMessages=new ArrayList<WifiMessage>();
+         wifiManager=(WifiManager)getContext().getSystemService(Context.WIFI_SERVICE);
 
-        System.out.println("populateWiifList");
-        WifiMessage wifiMessage=new WifiMessage("First Wifi","Got your message",android.R.drawable.ic_dialog_email);
-        wifiMessages.add(wifiMessage);
+        if(!wifiManager.isWifiEnabled())
+        {
+            wifiManager.setWifiEnabled(true);
+        }
 
-        wifiMessage=new WifiMessage("Second Wifi","Got your message",android.R.drawable.ic_dialog_email);
-        wifiMessages.add(wifiMessage);
+        WifiReceiver wifiReceiver=new WifiReceiver();
 
-        wifiMessage=new WifiMessage("Third Wifi","Got your message", android.R.drawable.ic_dialog_email);
-        wifiMessages.add(wifiMessage);
+        getContext().registerReceiver(wifiReceiver, new IntentFilter(wifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
-        wifiMessage=new WifiMessage("Fourth Wifi","Got your message",android.R.drawable.ic_dialog_email);
-        wifiMessages.add(wifiMessage);
+        wifiManager.startScan();
+
 
     }
-    public void populateListView(View rootView)
+    public void populateListViews(View rootView)
     {
 
         System.out.println("populateListView");
@@ -89,16 +101,68 @@ public class FragmentMessagesActivity extends Fragment {
 }
 
 
+private class WifiReceiver extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+
+        if (android.os.Build.VERSION.SDK_INT >= 23) {
+            // only for marshamallow and newer versions
+
+            System.out.println("Entering permission grant");
+
+            if (getActivity().checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+                getActivity().requestPermissions(new String[]{Manifest.permission.CHANGE_WIFI_STATE}, 123);
+            }   //  WIFI CHANGE STATE
+
+            if (getActivity().checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                getActivity().requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 456);
+            }   //  WIFI CHANGE STATE
+        }
+
+      while(!permissiongrant);
+
+        List<ScanResult> scanResults = wifiManager.getScanResults();
+
+        wifiMessages=new ArrayList<WifiMessage>();
+
+        if (scanResults == null) {
+            wifiMessages.add(new WifiMessage("Wifi Scan results not available ", "nothing", R.drawable.alias_photo));
+        } else {
+            for (int i = 0; i < scanResults.size(); i++) {
+                WifiMessage wifiMessage = new WifiMessage(scanResults.get(i).SSID.toString(), scanResults.get(i).BSSID.toString(), R.drawable.alias_photo);
+                wifiMessages.add(wifiMessage);
+                //wifiMessages.add(new WifiMessage("Wifi Scan results not available","nothing",R.drawable.alias_photo));
+            }
+
+
+        }
+        populateListViews(rootView);
+    }
 
 
 
+}
 
-private class WifiMessageAdapter extends ArrayAdapter<WifiMessage> {
-    ArrayList<WifiMessage> wifiMessages;
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-    public WifiMessageAdapter(Context context, int position, ArrayList<WifiMessage> wifiMessages) {
+        if(requestCode==123)
+        {
+            if(grantResults.length>0 &&  grantResults[0]==PackageManager.PERMISSION_GRANTED)
+            {
+                permissiongrant=true;
+            }
+        }
+    }
+
+    private class WifiMessageAdapter extends ArrayAdapter<WifiMessage> {
+    List<WifiMessage> wifiMessages;
+
+    public WifiMessageAdapter(Context context, int positionm,List<WifiMessage> wifiMessages) {
         super(context, R.layout.list_item, wifiMessages);
-        this.wifiMessages = wifiMessages;
+        this.wifiMessages=wifiMessages;
+
     }
 
     @Override
