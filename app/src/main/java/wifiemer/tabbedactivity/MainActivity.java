@@ -56,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
 
         tablayout.setupWithViewPager(mViewPager);
 
+        CryptEncrypt cryptEncrypt=new CryptEncrypt();
+        cryptEncrypt.performOp();
+
     }
 
 
