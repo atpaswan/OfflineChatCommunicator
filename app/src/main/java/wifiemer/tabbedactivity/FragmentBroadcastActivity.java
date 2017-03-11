@@ -57,28 +57,49 @@ public class FragmentBroadcastActivity extends Fragment{
     public void populateArrList()
     {
         listHeader=new ArrayList<String>();
-        listHeader.add("COUNTRIES");
-        listHeader.add("SCIENTISTS");
-        listHeader.add("ENGINEERS");
-        listHeader.add("POLICE PERSONS");
+        String headerItem1="ALERTS";
+        String headerItem2="WARNINGS";
+        String headerItem3="HAPPY SITUATION";
+        String headerItem4="SAD SITUATION";
+
+        listHeader.add(headerItem1);
+        listHeader.add(headerItem2);
+        listHeader.add(headerItem3);
+        listHeader.add(headerItem4);
 
         List<String> subs=new ArrayList<String>();
 
-        subs.add("Option 1");
-        subs.add("Option 2");
-        subs.add("Option 3");
-        subs.add("Option 4");
+        subs.add("A PERSON NAMED KALLU IS IN 50  METRES DIAMETER OF THIS AREAS");
+        subs.add("Ineligible");
 
+        childNodeList.put(headerItem1, subs);
 
-        childNodeList.put("COUNTRIES", subs);
-        childNodeList.put("SCIENTISTS", subs);
-        childNodeList.put("ENGINEERS",subs);
-        childNodeList.put("POLICE PERSONS",subs);
+        subs=new ArrayList<String>();
+
+        subs.add(" PLEASE KEEP AWAY FROM THIS PLACE. THERE ARE ZOMBIES HERE");
+        subs.add("Ineligible");
+
+        childNodeList.put(headerItem2, subs);
+
+        subs=new ArrayList<String>();
+
+        subs.add("A PERSON NAMED SASURA HAS A BIRTHDAY CELEBRATION WITHIN 50 METRES OF THIS VICINITY");
+        subs.add("Ineligible");
+
+        childNodeList.put(headerItem3,subs);
+
+        subs=new ArrayList<String>();
+
+        subs.add(" A PERSON NAMED SASURA HAS DIED WITHIN 50 METRES OF THIS VICINITY. PLEASE STAY QUIET");
+        subs.add("Ineligible");
+        childNodeList.put(headerItem4,subs);
 
 
 
 
     }
+
+
 
     private class BroadCastItemAdapter extends BaseExpandableListAdapter
     {
@@ -135,7 +156,7 @@ public class FragmentBroadcastActivity extends Fragment{
 
             TextView textView2=(TextView)convertView.findViewById(R.id.textView2);
 
-            textView2.setText(childString+" child "+childPosition+", "+groupPosition);
+            textView2.setText(childString);
 
            return convertView;
 
