@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="1">
+    >
 
-    <TextView
-        android:layout_width="152dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView1"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="0.10" />
+
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:paddingBottom="40dp"
         android:id="@+id/listView"
-        android:footerDividersEnabled="false"
-        android:divider="@android:color/background_dark" />
+        android:footerDividersEnabled="true"
+        android:divider="#cec9c9"
+        android:headerDividersEnabled="true"
+        android:contextClickable="false"
+        android:dividerHeight="2dp" />
 </LinearLayout>
+
