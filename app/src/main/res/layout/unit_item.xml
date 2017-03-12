@@ -11,4 +11,27 @@
         android:textSize="20sp"
         android:id="@+id/textView2"
         android:layout_weight="0.02" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter Input String"
+        android:id="@+id/textView3"
+        android:layout_weight="0.02"
+        android:textSize="20dp" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/inputText"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.02" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SEND"
+        android:id="@+id/sendButton"
+        android:layout_weight="0.02" />
+
 </LinearLayout>

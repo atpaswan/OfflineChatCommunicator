@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
@@ -155,6 +157,38 @@ public class FragmentBroadcastActivity extends Fragment{
             String childString=childNodeList.get(listHeader.get(groupPosition)).get(childPosition);
 
             TextView textView2=(TextView)convertView.findViewById(R.id.textView2);
+            EditText inputText=(EditText)convertView.findViewById(R.id.inputText);
+            Button sendButton=(Button)convertView.findViewById(R.id.sendButton);
+
+            String input1=inputText.getText().toString();
+
+            String[][] passWord=new String[4][4];
+
+            String pass="SamarthSenaSuraksha";
+
+            for(int i=0;i<4;i++)
+            {
+                for(int j=0;j<4;j++)
+                    passWord[i][j]=pass+(i+1)+(j+1);  // filling the passWord array with the appropriate variations
+
+            }
+
+            sendButton.setOnClickListener(new View.OnClickListener() {   // Triggering the hotspot with the given input characteristics using the send button
+                @Override
+                public void onClick(View v) {
+
+               WifiHotSpotAccess wifiHotSpotAccess=new WifiHotSpotAccess();
+                    boolean getState= wifiHotSpotAccess.setHotspotwithName("FirstTest",getContext());
+
+                    if(getState)
+                    {
+                        System.out.println("Hotspot triggered");
+                    }
+
+
+
+                }
+            });
 
             textView2.setText(childString);
 
