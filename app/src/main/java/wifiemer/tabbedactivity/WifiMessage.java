@@ -7,6 +7,7 @@ public class WifiMessage {
 
     int icon_id;
     String WifiName;
+    String LastMessage;
 
     public WifiMessage(String wifiName, String lastMessage, int icon_id) {
         WifiName = wifiName;
@@ -14,7 +15,7 @@ public class WifiMessage {
         this.icon_id = icon_id;
     }
 
-    String LastMessage;
+
 
     public int getIcon_id() {
         return icon_id;
