@@ -1,5 +1,8 @@
 package wifiemer.tabbedactivity;
 
+import java.sql.Time;
+import java.util.Date;
+
 /**
  * Created by Atul on 2/27/2017.
  */
@@ -8,6 +11,15 @@ public class WifiMessage {
     int icon_id;
     String WifiName;
     String LastMessage;
+    Date date;
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
 
     public WifiMessage(String wifiName, String lastMessage, int icon_id) {
         WifiName = wifiName;
