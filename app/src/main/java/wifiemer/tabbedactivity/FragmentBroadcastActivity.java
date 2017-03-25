@@ -1,8 +1,10 @@
 package wifiemer.tabbedactivity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -157,7 +159,7 @@ public class FragmentBroadcastActivity extends Fragment{
             String childString=childNodeList.get(listHeader.get(groupPosition)).get(childPosition);
 
             TextView textView2=(TextView)convertView.findViewById(R.id.textView2);
-            EditText inputText=(EditText)convertView.findViewById(R.id.inputText);
+            final EditText inputText=(EditText)convertView.findViewById(R.id.inputText);
             Button sendButton=(Button)convertView.findViewById(R.id.sendButton);
 
             String input1=inputText.getText().toString();
@@ -173,19 +175,38 @@ public class FragmentBroadcastActivity extends Fragment{
 
             }
 
-            sendButton.setOnClickListener(new View.OnClickListener() {   // Triggering the hotspot with the given input characteristics using the send button
+            System.out.println(sendButton.getText() + " sendbutton");
+
+           sendButton.setOnClickListener(new View.OnClickListener() {   // Triggering the hotspot with the given input characteristics using the send button
                 @Override
                 public void onClick(View v) {
+                    System.out.println(" EnterString: " );
 
-               WifiHotSpotAccess wifiHotSpotAccess=new WifiHotSpotAccess();
-                    boolean getState= wifiHotSpotAccess.setHotspotwithName("FirstTest",getContext());
 
-                    if(getState)
+                    if(inputText==null)
+                        System.out.println("currentEdittext null");
+
+                if(inputText!=null) {
+                    String enterString = inputText.getText().toString();
+
+                    try {
+                        byte[] encryptebytes = (new CryptEncrypt()).Encrypt(enterString);
+                        enterString= Base64.encodeToString(encryptebytes,Base64.DEFAULT);
+                    }
+                    catch(Exception e)
                     {
-                        System.out.println("Hotspot triggered");
+
                     }
 
+                    System.out.println("Entering if"+enterString);
 
+                    WifiHotSpotAccess wifiHotSpotAccess = new WifiHotSpotAccess();
+                    boolean getState = wifiHotSpotAccess.setHotspotwithName(enterString, getContext());
+
+                    if (getState) {
+                        System.out.println("Hotspot triggered");
+                    }
+                }
 
                 }
             });
