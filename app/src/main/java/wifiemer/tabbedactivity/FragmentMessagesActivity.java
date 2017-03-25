@@ -41,7 +41,6 @@ public class FragmentMessagesActivity extends Fragment {
     WifiManager wifiManager;
     View rootView;
     boolean permissiongrant=true;
-    Boolean opComplete;
     Handler mUIHandler=new Handler() {
         @Override
         public void close() {
@@ -170,8 +169,6 @@ private class WifiReceiver extends BroadcastReceiver {
         progress.setProgress(20);
         progress.show();
 
-        opComplete=false;
-
         new Thread()
         {
 
@@ -226,8 +223,6 @@ private class WifiReceiver extends BroadcastReceiver {
                             populateListViews(rootView);
                         }
                     });
-
-                    opComplete=true;
                 }
 
 
