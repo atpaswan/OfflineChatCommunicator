@@ -1,6 +1,7 @@
 package wifiemer.tabbedactivity;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.Layout;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +27,8 @@ import android.widget.TextView;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 /**
  * Created by Atul on 2/26/2017.
@@ -37,6 +41,30 @@ public class FragmentMessagesActivity extends Fragment {
     WifiManager wifiManager;
     View rootView;
     boolean permissiongrant=true;
+    Boolean opComplete;
+    Handler mUIHandler=new Handler() {
+        @Override
+        public void close() {
+
+        }
+
+        @Override
+        public void flush() {
+
+        }
+
+
+        @Override
+        public void publish(LogRecord record) {
+
+        }
+
+        public void publishMessage(ProgressDialog progressdialog,int progress) {
+
+            progressdialog.setProgress(progress);
+
+        }
+    };
 
     public static FragmentMessagesActivity newInstance() {
         FragmentMessagesActivity fragment = new FragmentMessagesActivity();
@@ -58,6 +86,12 @@ public class FragmentMessagesActivity extends Fragment {
 
 
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
     }
 
     public void registerClickListener(final View rootView)
@@ -87,7 +121,7 @@ public class FragmentMessagesActivity extends Fragment {
 
         wifiManager.startScan();
 
-
+       // getContext().unregisterReceiver(wifiReceiver);
     }
     public void populateListViews(View rootView)
     {
@@ -98,12 +132,13 @@ public class FragmentMessagesActivity extends Fragment {
         ArrayAdapter<WifiMessage> adapter=new WifiMessageAdapter(rootView.getContext(),R.layout.list_item,wifiMessages);
 
         listView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
 }
 
 
 private class WifiReceiver extends BroadcastReceiver {
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
 
         if (android.os.Build.VERSION.SDK_INT >= 23) {
             // only for marshamallow and newer versions
@@ -121,26 +156,86 @@ private class WifiReceiver extends BroadcastReceiver {
 
       while(!permissiongrant);
 
-        List<ScanResult> scanResults = wifiManager.getScanResults();
+       final List<ScanResult> scanResults = wifiManager.getScanResults();
 
-        wifiMessages=new ArrayList<WifiMessage>();
+        final ArrayList<WifiMessage> wifiMessages_ext=new ArrayList<WifiMessage>();
 
-        if (scanResults == null) {
-            wifiMessages.add(new WifiMessage("Wifi Scan results not available ", "nothing", R.drawable.alias_photo));
-        } else {
-            for (int i = 0; i < scanResults.size(); i++) {
-                WifiMessage wifiMessage = new WifiMessage(scanResults.get(i).SSID.toString(), scanResults.get(i).BSSID.toString(), R.drawable.alias_photo);
-                wifiMessages.add(wifiMessage);
-                //wifiMessages.add(new WifiMessage("Wifi Scan results not available","nothing",R.drawable.alias_photo));
+        (new CryptEncrypt()).performOp();
+        System.out.println("After execute Op");
+
+        final ProgressDialog progress=new ProgressDialog(getContext());
+        progress.setMessage("Receving messages");
+        progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progress.setIndeterminate(false);
+        progress.setProgress(20);
+        progress.show();
+
+        opComplete=false;
+
+        new Thread()
+        {
+
+            public void run() {
+                if (scanResults == null) {
+                    wifiMessages_ext.add(new WifiMessage("Wifi Scan results not available ", "nothing", R.drawable.alias_photo));
+                } else
+
+                {
+                    for (int i = 0; i < scanResults.size(); i++) {
+
+                        Boolean addFlag = false;
+                        String wifiString = scanResults.get(i).SSID.toString();
+                        try                                                      // try block for filtering the WIFI SSID to check if it is actually the message
+                        {
+
+                            byte[] encryptBytes = Base64.decode(wifiString, Base64.DEFAULT);
+
+                            byte[] decryptBytes = (new CryptEncrypt()).Decrypt(encryptBytes);
+                            wifiString = new String(decryptBytes);
+                            System.out.println("tryExecute");
+                            addFlag = true;
+                        } catch (Exception e) {
+                            System.out.println("padding Exception " + wifiString);
+                        }
+
+                        if (wifiString.charAt(0) == 'D')    // For testing purposes only, not for production
+                            addFlag = true;
+
+                        if (addFlag) {
+                            WifiMessage wifiMessage = new WifiMessage(wifiString, scanResults.get(i).BSSID.toString(), R.drawable.alias_photo);
+                            wifiMessages_ext.add(wifiMessage);
+                            System.out.println("wifimessages added");
+                            //wifiMessages.add(new WifiMessage("Wifi Scan results not available","nothing",R.drawable.alias_photo));
+                        }
+                    }
+
+                    System.out.println("setting progress");
+
+                    getActivity().runOnUiThread(new Runnable() {   // Running on UI thread
+                        @Override
+                        public void run() {
+                            progress.setProgress(100);
+                            wifiMessages.clear();
+
+
+                            for(int i=0;i<wifiMessages_ext.size();i++)
+                            {
+                                wifiMessages.add(wifiMessages_ext.get(i));
+                                System.out.println("adding messages");
+                            }
+                            populateListViews(rootView);
+                        }
+                    });
+
+                    opComplete=true;
+                }
+
+
             }
+        }.start();
 
 
-        }
-        populateListViews(rootView);
     }
-
-
-
 }
 
     @Override
