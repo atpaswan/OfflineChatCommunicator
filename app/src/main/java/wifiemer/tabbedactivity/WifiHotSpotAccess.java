@@ -35,7 +35,7 @@ public class WifiHotSpotAccess {
            getWifiAPMethod = wifiManager.getClass().getMethod("getWifiApConfiguration");
            WifiConfiguration myConfig=(WifiConfiguration)getWifiAPMethod.invoke(wifiManager);
 
-            myConfig.SSID="EngineeredSSID";
+            myConfig.SSID=hotSpotName;
 
 
             Method setWifiAPMethod=wifiManager.getClass().getMethod("setWifiApConfiguration",WifiConfiguration.class);
