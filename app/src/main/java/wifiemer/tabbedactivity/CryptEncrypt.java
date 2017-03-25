@@ -1,6 +1,10 @@
 package wifiemer.tabbedactivity;
 
 import android.provider.Settings;
+import android.util.Base64;
+import android.util.Log;
+
+import java.util.*;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -13,6 +17,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import static android.util.Base64.*;
 
 /**
  * Created by Atul on 3/7/2017.
@@ -43,7 +49,7 @@ public class CryptEncrypt {
 
     public byte[] Decrypt(byte[] encrypted) throws Exception
     {
-        KeySpec keySpec=new PBEKeySpec("Ragiguddatemple12".toCharArray(),"Salty_Ladki".getBytes(),1000,256);
+        KeySpec keySpec=new PBEKeySpec("Ragiguddatemple".toCharArray(),"Salty_Ladki".getBytes(),1000,256);
 
 
         SecretKeyFactory secretKeyFactory=SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
@@ -69,10 +75,10 @@ public class CryptEncrypt {
             String UnEnc="This is the unencrypted text";
 
             byte[] encryptbytes = Encrypt(UnEnc);
-            System.out.println(UnEnc+" ackerman");
-            System.out.println(new String(encryptbytes)+"hello ");
+            String encoded= Base64.encodeToString(encryptbytes,DEFAULT);
+            System.out.println("er hello I am here " + encoded + " " + encoded.length());
 
-            byte[] decryptbytes=Decrypt(encryptbytes);
+            byte[] decryptbytes=Decrypt(Base64.decode(encoded,DEFAULT));
             System.out.println("rocking "+new String(decryptbytes));
         }
         catch(Exception e)
