@@ -6,12 +6,21 @@ import java.util.Date;
 /**
  * Created by Atul on 2/27/2017.
  */
-public class WifiMessage {
+public class WifiMessage implements java.io.Serializable {
 
     int icon_id;
     String WifiName;
+    String BSSID;
     String LastMessage;
     Date date;
+
+    public String getBSSID() {
+        return BSSID;
+    }
+
+    public void setBSSID(String BSSID) {
+        this.BSSID = BSSID;
+    }
 
     public Date getDate() {
         return date;
@@ -21,10 +30,11 @@ public class WifiMessage {
         this.date = date;
     }
 
-    public WifiMessage(String wifiName, String lastMessage, int icon_id) {
+    public WifiMessage(String wifiName, String lastMessage, int icon_id,Date date) {
         WifiName = wifiName;
         LastMessage = lastMessage;
         this.icon_id = icon_id;
+        this.date=date;
     }
 
 
