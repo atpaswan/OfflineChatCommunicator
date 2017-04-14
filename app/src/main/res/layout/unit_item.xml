@@ -21,11 +21,13 @@
         android:textSize="20dp" />
 
     <EditText
+
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/inputText"
         android:layout_gravity="center_horizontal"
-        android:layout_weight="0.02" />
+        android:layout_weight="0.02"
+        />
 
     <Button
         android:layout_width="wrap_content"
