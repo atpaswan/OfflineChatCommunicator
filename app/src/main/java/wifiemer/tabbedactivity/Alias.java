@@ -6,6 +6,8 @@ package wifiemer.tabbedactivity;
 class Alias
 {
     int image_id;
+    byte[] imageBytes;
+    String imageType;
     String broadcastID;
     String UserName;
 
