@@ -1,20 +1,40 @@
 package wifiemer.tabbedactivity;
 
+import android.media.Image;
+
+import java.io.Serializable;
+
 /**
  * Created by Atul on 4/15/2017.
  */
-class Alias
+class Alias implements Serializable
 {
     int image_id;
-    byte[] imageBytes;
+    Image imagePic;
     String imageType;
-    String broadcastID;
+    String broadcastID; // Broadcast ID is the wifi BSSID in the Alias Object
     String UserName;
 
     public Alias(int image_id, String broadcastID, String userName) {
         this.image_id = image_id;
         this.broadcastID = broadcastID;
         UserName = userName;
+    }
+
+    public Image getImagePic() {
+        return imagePic;
+    }
+
+    public void setImagePic(Image imagePic) {
+        this.imagePic = imagePic;
+    }
+
+    public String getImageType() {
+        return imageType;
+    }
+
+    public void setImageType(String imageType) {
+        this.imageType = imageType;
     }
 
     public int getImage_id() {

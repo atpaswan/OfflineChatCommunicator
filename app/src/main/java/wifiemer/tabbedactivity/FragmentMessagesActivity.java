@@ -24,9 +24,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.security.Permission;
 import java.util.ArrayList;
@@ -65,12 +67,17 @@ public class FragmentMessagesActivity extends Fragment {
                 FileInputStream fis = getContext().openFileInput(getResources().getString(R.string.wifi_FileName));
                 ObjectInputStream ois= new ObjectInputStream(fis);
                 wifiMessagesReceived =(List<WifiMessage>)ois.readObject();
-                wifiMessages=wifiMessagesReceived;
-                System.out.print("reading wifiMessages");
+
+                for(int i=0;i<wifiMessagesReceived.size();i++)
+                    wifiMessages.add(wifiMessagesReceived.get(i));
+
+                System.out.println("reading wifiMessages");
+
+                fis.close();
             }
             catch(Exception e)
             {
-                System.out.println("wifiMessagesObject cannot be contructed");
+                System.out.println("wifiMessagesObject cannot be constructed");
             }
 
         }
@@ -120,6 +127,8 @@ public class FragmentMessagesActivity extends Fragment {
                     FileOutputStream fos = getContext().openFileOutput(getResources().getString(R.string.wifi_FileName),Context.MODE_PRIVATE);
                     ObjectOutputStream oos=new ObjectOutputStream(fos);
                     oos.writeObject(wifiMessagesReceived);
+                    fos.flush();
+                    fos.close();
                 }
                 catch(Exception e)
                 {
@@ -187,6 +196,7 @@ public class FragmentMessagesActivity extends Fragment {
         WifiReceiver wifiReceiver=new WifiReceiver();
 
         getContext().registerReceiver(wifiReceiver, new IntentFilter(wifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        CommonVars.wifiReceiver=wifiReceiver;
 
         wifiManager.startScan();
 
@@ -272,7 +282,7 @@ private class WifiReceiver extends BroadcastReceiver {
                             System.out.println("padding Exception " + wifiString);
                         }
 
-                        if (wifiString.charAt(0) == 'u')    // For testing purposes only, not for production
+                        if (wifiString.charAt(0) == 'A')    // For testing purposes only, not for production
                             addFlag = true;
 
                         if (addFlag) {
@@ -281,8 +291,9 @@ private class WifiReceiver extends BroadcastReceiver {
                                 @Override
                                 public void run() {
                                     if(getMessageAdded(wifiMessage)) {
+                                        System.out.println("wifi size "+wifiMessages.size());
                                         wifiMessages.add(wifiMessage);
-                                        System.out.println("wifimessages added");
+                                        System.out.println("wifimessages added "+wifiMessages.size());
                                     }
                                 }
                             });
@@ -359,7 +370,7 @@ private class WifiReceiver extends BroadcastReceiver {
     }
 };
 
-    public boolean getMessageAdded(WifiMessage wifiMessage)   // to determine whether the filtered message is an already received message or not
+    public boolean getMessageAdded(final WifiMessage wifiMessage)   // to determine whether the filtered message is an already received message or not
     {
         boolean isReceived=false;
 
@@ -380,7 +391,85 @@ private class WifiReceiver extends BroadcastReceiver {
         return false;
         else {
             wifiMessagesReceived.add(wifiMessage);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    System.out.println("Calling insertAliasPersistData");
+                    insertAliasPersistData(wifiMessage);
+                }
+            }).start();
+
+            System.out.println("return true");
             return true;
+        }
+    }
+
+
+
+
+
+    public void insertAliasPersistData(WifiMessage wifiMessage)
+    {
+        try {
+            FileInputStream fis = getContext().openFileInput(getResources().getString(R.string.aliasFileName));
+            ObjectInputStream ois=new ObjectInputStream(fis);
+            ArrayList<Alias> aliasArrayList=(ArrayList<Alias>)ois.readObject();
+            fis.close();
+
+            boolean foundFlag=false;
+            int size=aliasArrayList.size();
+
+            for(int i=0;i<size;i++)
+            {
+                Alias currAlias=aliasArrayList.get(i);
+
+                if(wifiMessage.getWifiName().equals(currAlias.getBroadcastID()))
+                {
+                    foundFlag=true;
+                    break;
+                }
+            }
+
+
+            if(!foundFlag)
+            {
+                Alias newAlias=new Alias(R.drawable.alias_photo,wifiMessage.getBSSID(),wifiMessage.getLastMessage());
+                aliasArrayList.add(newAlias);  // new AliasObject added after checking whether it is already present in the Alias Persist data
+
+                FileOutputStream fos=getContext().openFileOutput(getResources().getString(R.string.aliasFileName),Context.MODE_PRIVATE);
+                ObjectOutputStream oos=new ObjectOutputStream(fos);
+                oos.writeObject(aliasArrayList);     // persisting the new Alias data
+                System.out.println(aliasArrayList.size());
+                fos.flush();
+                fos.close();
+
+                ArrayList<Alias> aliasArrayList1=(new FragmentAliasActivity()).loadfromAliasFile();
+                aliasArrayList1=(new FragmentAliasActivity()).loadfromAliasFile();
+            }
+
+        }
+        catch(Exception e)
+        {
+            System.out.println("Error in writing the alias File for validation operations.");  // This means we need to create a new file for persisting the Alias Data
+
+            e.printStackTrace();
+            try {
+                FileOutputStream fos = getContext().openFileOutput(getResources().getString(R.string.aliasFileName), Context.MODE_PRIVATE);
+                ObjectOutputStream oos=new ObjectOutputStream(fos);
+                ArrayList<Alias> arrayList=new ArrayList<Alias>();
+                Alias newAlias=new Alias(R.drawable.alias_photo,wifiMessage.getBSSID(),wifiMessage.getLastMessage());
+                arrayList.add(newAlias);
+                oos.writeObject(arrayList);
+                System.out.println("Completing writing the Alias persist data " + arrayList.size());
+
+                fos.flush();
+                fos.close();
+            }
+            catch(Exception excp)
+            {
+                System.out.println("Error in creating the Alias file persist data");
+            }
         }
     }
 }

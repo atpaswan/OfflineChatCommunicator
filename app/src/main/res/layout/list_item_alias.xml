@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content" android:layout_height="wrap_content">
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+android:focusable="false"
+    android:descendantFocusability="blocksDescendants"
+    >
 
     <ImageView
         android:layout_width="120sp"
@@ -8,12 +11,16 @@
         android:id="@+id/imageView"
 
         android:focusable="false"
+        android:focusableInTouchMode="false"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignBottom="@+id/LastMessage" />
+        android:layout_alignBottom="@+id/LastMessage"
+        android:clickable="false" />
 
     <TextView
+        android:focusableInTouchMode="false"
+        android:focusable="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Wifi BroadCastID"
@@ -27,6 +34,7 @@
         android:layout_alignParentTop="true" />
 
     <TextView
+        android:focusable="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Wifi Alias"

@@ -141,4 +141,19 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+
+    }
 }

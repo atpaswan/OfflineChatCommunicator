@@ -8,5 +8,6 @@
         android:layout_height="wrap_content"
         android:paddingBottom="70dp"
         android:layout_weight="1"
-        android:id="@+id/listViewAlias" />
+        android:id="@+id/listViewAlias"
+        android:descendantFocusability="blocksDescendants"/>
 </LinearLayout>

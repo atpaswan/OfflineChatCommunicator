@@ -35,6 +35,7 @@ public class WifiMessage implements java.io.Serializable {
         LastMessage = lastMessage;
         this.icon_id = icon_id;
         this.date=date;
+        this.BSSID=wifiName;
     }
 
 
