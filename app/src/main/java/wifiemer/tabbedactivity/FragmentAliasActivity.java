@@ -3,6 +3,10 @@ package wifiemer.tabbedactivity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
@@ -16,8 +20,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -30,7 +37,7 @@ public class FragmentAliasActivity extends Fragment
 {
 
     ArrayList<Alias> aliasArrayList=new ArrayList<Alias>();
-    int currListPosition=-1;
+    ImageView currImageView;
 
     LayoutInflater inflater;
         public static FragmentAliasActivity newInstance() {
@@ -86,6 +93,26 @@ public class FragmentAliasActivity extends Fragment
         return aliasArrayList;
     }
 
+    public void writeToAliasFile()
+    {
+        try {
+            FileOutputStream fos=getContext().openFileOutput(getResources().getString(R.string.aliasFileName),Context.MODE_PRIVATE);
+            ObjectOutputStream oos=new ObjectOutputStream(fos);
+            oos.writeObject(aliasArrayList);
+            System.out.println("writetoAlias done "+aliasArrayList.size());
+
+            fos.close();
+        }
+        catch(Exception e)
+        {
+            System.out.println("error in writing Alias File");
+            e.printStackTrace();
+        }
+
+    }
+
+
+
     @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
@@ -114,7 +141,7 @@ public class FragmentAliasActivity extends Fragment
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                  currListPosition=position;
+
                System.out.println("triggering onItemClickListener");
             }
         });
@@ -149,7 +176,9 @@ public class FragmentAliasActivity extends Fragment
             convertView.setFocusable(false);   // so that the item click listener event is intercepted
             Alias alias=aliasArrayList.get(position);
 
-            ImageView imageView=(ImageView)convertView.findViewById(R.id.imageView);
+            final ImageView imageView=(ImageView)convertView.findViewById(R.id.imageView);
+
+            imageView.setContentDescription(position+"");
 
             // setting the onclick listener for the imageview
 
@@ -157,18 +186,30 @@ public class FragmentAliasActivity extends Fragment
                 @Override
                 public void onClick(View v) {
 
-                    Intent intent=new Intent();
+                    Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_GET_CONTENT);
                     intent.setType("image/*");
 
-                    startActivityForResult(Intent.createChooser(intent,"Please Select An Image"),1);
+                    System.out.println("You have clicked on the image at item " + imageView.getContentDescription());
+                    CommonVars.currListPosition=Integer.parseInt(imageView.getContentDescription().toString());
+                    //imageView.setImageResource(R.drawable.image001);
+                    //aliasArrayList.get(currListPosition).setImage_id(R.drawable.image001);
+                    startActivityForResult(Intent.createChooser(intent, "Please Select An Image"), 1);
                 }
             });
+
+
 
             TextView wifiBroadCastID=(TextView)convertView.findViewById(R.id.wifiBroadCastID);
             TextView wifiAlias=(TextView)convertView.findViewById(R.id.wifiAlias);
 
+            if(alias.getImageByteArray()==null)
             imageView.setImageResource(alias.getImage_id());
+            else
+            {
+                Bitmap bitmap= BitmapFactory.decodeByteArray(alias.getImageByteArray(),0,alias.getImageByteArray().length);
+                imageView.setImageBitmap(bitmap);
+            }
             wifiBroadCastID.setText(alias.getBroadcastID());
             wifiAlias.setText(alias.getUserName());
 
@@ -186,11 +227,23 @@ public class FragmentAliasActivity extends Fragment
         {
             case 1: if(data!=null)
             {
-                System.out.println("triggering OnActivity Result "+currListPosition);
+                try
+                {
+                System.out.println("triggering OnActivity Result "+CommonVars.currListPosition);
                 Uri uri=data.getData();
+                InputStream imageStream=getContext().getContentResolver().openInputStream(uri);
 
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+                    Bitmap bitmap= BitmapFactory.decodeStream(imageStream);
+                    if(bitmap!=null)
+                        System.out.println("Bitmap is not null");
+
+                    ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG,100,byteArrayOutputStream);
+                    aliasArrayList.get(CommonVars.currListPosition).setImageByteArray(byteArrayOutputStream.toByteArray());
+                    writeToAliasFile();
+                    if(currImageView==null)
+                        System.out.println("currImageView is null");
+
 
                 }
                 catch(Exception e)

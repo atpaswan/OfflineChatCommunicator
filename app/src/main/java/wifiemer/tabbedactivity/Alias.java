@@ -1,5 +1,6 @@
 package wifiemer.tabbedactivity;
 
+import android.graphics.Bitmap;
 import android.media.Image;
 
 import java.io.Serializable;
@@ -10,10 +11,10 @@ import java.io.Serializable;
 class Alias implements Serializable
 {
     int image_id;
-    Image imagePic;
     String imageType;
     String broadcastID; // Broadcast ID is the wifi BSSID in the Alias Object
     String UserName;
+    byte[] imageByteArray;
 
     public Alias(int image_id, String broadcastID, String userName) {
         this.image_id = image_id;
@@ -21,12 +22,12 @@ class Alias implements Serializable
         UserName = userName;
     }
 
-    public Image getImagePic() {
-        return imagePic;
+    public byte[] getImageByteArray() {
+        return imageByteArray;
     }
 
-    public void setImagePic(Image imagePic) {
-        this.imagePic = imagePic;
+    public void setImageByteArray(byte[] imageByteArray) {
+        this.imageByteArray = imageByteArray;
     }
 
     public String getImageType() {

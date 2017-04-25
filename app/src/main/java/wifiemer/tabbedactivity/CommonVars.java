@@ -16,4 +16,6 @@ public class CommonVars {
     public static View view;
     public static boolean  messageActivity=false;
     public static BroadcastReceiver wifiReceiver;
+    public static int currListPosition=-1;
+    public static boolean isItemAdded=false;
 }

@@ -187,16 +187,16 @@ public class FragmentBroadcastActivity extends Fragment{
                         System.out.println("currentEdittext null");
 
                 if(inputText!=null) {
-                    String enterString = inputText.getText().toString();
+                    String enterString = "01"+inputText.getText().toString();
 
-                    try {
+                 /*   try {
                         byte[] encryptebytes = (new CryptEncrypt()).Encrypt(enterString);
                         enterString= Base64.encodeToString(encryptebytes,Base64.DEFAULT);
                     }
                     catch(Exception e)
                     {
 
-                    }
+                    } */
 
                     System.out.println("Entering if"+enterString);
 

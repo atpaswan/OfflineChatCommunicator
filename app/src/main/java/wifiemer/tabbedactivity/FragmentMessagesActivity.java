@@ -1,6 +1,7 @@
 package wifiemer.tabbedactivity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -52,6 +53,13 @@ public class FragmentMessagesActivity extends Fragment {
     List<WifiMessage> wifiMessagesReceived=new ArrayList<WifiMessage>();
     static FragmentMessagesActivity fragmentObj;
     boolean restoreFlag=false;
+    Activity mActivity;
+
+    @Override
+    public void onAttach(Activity context) {
+        super.onAttach(context);
+        mActivity=context;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,6 +68,7 @@ public class FragmentMessagesActivity extends Fragment {
         if(CommonVars.messageActivity) {
             wifiMessages = CommonVars.wifiMessages;
             wifiMessagesReceived = CommonVars.wifiMessagesReceived;
+            CommonVars.messageActivity=false;
         }
         else   // load the wifiMessagesReceived from the file
         {
@@ -199,7 +208,7 @@ public class FragmentMessagesActivity extends Fragment {
         CommonVars.wifiReceiver=wifiReceiver;
 
         wifiManager.startScan();
-
+        populateListViews(rootView);
        // getContext().unregisterReceiver(wifiReceiver);
     }
 
@@ -265,6 +274,8 @@ private class WifiReceiver extends BroadcastReceiver {
                 } else
 
                 {
+                   CommonVars.isItemAdded=false;
+
                     for (int i = 0; i < scanResults.size(); i++) {
 
                         Boolean addFlag = false;
@@ -282,8 +293,10 @@ private class WifiReceiver extends BroadcastReceiver {
                             System.out.println("padding Exception " + wifiString);
                         }
 
-                        if (wifiString.charAt(0) == 'A')    // For testing purposes only, not for production
+                        if(isMessage(wifiString)) {                   // needs refinement, not the final prod version
+                            wifiString=extractMessage(wifiString);
                             addFlag = true;
+                        }
 
                         if (addFlag) {
                             final WifiMessage wifiMessage = new WifiMessage(scanResults.get(i).BSSID.toString(),wifiString, R.drawable.alias_photo,new Date());
@@ -293,6 +306,7 @@ private class WifiReceiver extends BroadcastReceiver {
                                     if(getMessageAdded(wifiMessage)) {
                                         System.out.println("wifi size "+wifiMessages.size());
                                         wifiMessages.add(wifiMessage);
+                                        CommonVars.isItemAdded=true;
                                         System.out.println("wifimessages added "+wifiMessages.size());
                                     }
                                 }
@@ -308,7 +322,10 @@ private class WifiReceiver extends BroadcastReceiver {
                         @Override
                         public void run() {
                            // progress.setProgress(100);
+                            if(CommonVars.isItemAdded)
                             populateListViews(rootView);
+
+                            wifiManager.startScan();
                         }
                     });
                 }
@@ -316,10 +333,25 @@ private class WifiReceiver extends BroadcastReceiver {
 
             }
         }.start();
-
-
     }
 }
+
+
+    public boolean isMessage(String wifiString)
+    {
+      if((wifiString.charAt(0)>=48 && wifiString.charAt(0)<=57) && (wifiString.charAt(1)>=48 && wifiString.charAt(1)<=57) )
+          return true;
+        else
+          return false;
+    }
+
+    public String extractMessage(String wifiString)
+    {
+        String formatString=wifiString.charAt(0)+wifiString.charAt(1)+"";
+        int formatPos=Integer.parseInt(formatString);
+
+        return wifiString.substring(2);
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -348,24 +380,25 @@ private class WifiReceiver extends BroadcastReceiver {
 
         View rootView = convertView;
 
-        if (rootView == null) {
-            rootView = getActivity().getLayoutInflater().inflate(R.layout.list_item, parent, false);
-        }
+            if (rootView == null) {
+                rootView = mActivity.getLayoutInflater().inflate(R.layout.list_item, parent, false);
+            }
 
-        ImageView imageView = (ImageView) rootView.findViewById(R.id.imageView);
+            ImageView imageView = (ImageView) rootView.findViewById(R.id.imageView);
 
-        WifiMessage wifiMessage = wifiMessages.get(position);
+            WifiMessage wifiMessage = wifiMessages.get(position);
 
-        imageView.setImageResource(wifiMessage.getIcon_id());
+            imageView.setImageResource(wifiMessage.getIcon_id());
 
-        TextView textView = (TextView) rootView.findViewById(R.id.WifiName);
-        textView.setText(wifiMessage.getWifiName());
+            TextView textView = (TextView) rootView.findViewById(R.id.WifiName);
+            textView.setText(wifiMessage.getWifiName());
 
-        TextView lastMessage = (TextView) rootView.findViewById(R.id.LastMessage);
-        lastMessage.setText(wifiMessage.getLastMessage());
+            TextView lastMessage = (TextView) rootView.findViewById(R.id.LastMessage);
+            lastMessage.setText(wifiMessage.getLastMessage());
 
 
-        return rootView;
+            return rootView;
+
 
     }
 };
