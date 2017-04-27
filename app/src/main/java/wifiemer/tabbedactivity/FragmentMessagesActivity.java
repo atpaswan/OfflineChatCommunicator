@@ -162,7 +162,7 @@ public class FragmentMessagesActivity extends Fragment {
         }
 
         else {
-            new Thread(new Runnable() {
+           new Thread(new Runnable() {
                 @Override
                 public void run() {
                     populateWifiMessageList();
