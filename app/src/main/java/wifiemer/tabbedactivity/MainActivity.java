@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
 
         CryptEncrypt cryptEncrypt=new CryptEncrypt();
         cryptEncrypt.performOp();
+        WiFip2pOps wiFip2pOps=new WiFip2pOps(getApplicationContext());
+
 
     }
 
