@@ -396,6 +396,15 @@ private class WifiReceiver extends BroadcastReceiver {
             TextView lastMessage = (TextView) rootView.findViewById(R.id.LastMessage);
             lastMessage.setText(wifiMessage.getLastMessage());
 
+           lastMessage.setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View v) {
+
+                   Intent intent=new Intent(getContext(),WifiMessageChatActivity.class);
+                   System.out.println("Executing the activity movement");
+                   startActivity(intent);
+               }
+           });
 
             return rootView;
 
