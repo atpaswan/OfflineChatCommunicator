@@ -5,6 +5,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * Created by Atul on 3/12/2017.
@@ -61,5 +62,39 @@ public class WifiHotSpotAccess {
         }
 
       return true;
+    }
+
+    public boolean connectToHotspot(String hotSpotName,Context context)
+    {
+        WifiConfiguration conf=new WifiConfiguration();
+        conf.SSID=hotSpotName;
+        conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        WifiManager wifiManager=(WifiManager)context.getSystemService(Context.WIFI_SERVICE);
+
+        if(!wifiManager.isWifiEnabled())
+            wifiManager.setWifiEnabled(true);
+
+        wifiManager.addNetwork(conf);
+        List<WifiConfiguration> wifiConfigurationList=wifiManager.getConfiguredNetworks();
+
+        for(WifiConfiguration i:wifiConfigurationList)
+        {
+            if(i.SSID!=null && i.SSID.equals(hotSpotName))
+            {
+                try
+                {
+                    wifiManager.disconnect();
+                    wifiManager.enableNetwork(i.networkId, true);
+                    wifiManager.reconnect();
+                    break;
+                }
+                catch(Exception e)
+                {
+                    System.out.println("catching connectToWifi Exception");
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
     }
 }
