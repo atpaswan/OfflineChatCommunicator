@@ -18,4 +18,5 @@ public class CommonVars {
     public static BroadcastReceiver wifiReceiver;
     public static int currListPosition=-1;
     public static boolean isItemAdded=false;
+    public static String selectedHotSpotName;
 }
