@@ -19,4 +19,6 @@ public class CommonVars {
     public static int currListPosition=-1;
     public static boolean isItemAdded=false;
     public static String selectedHotSpotName;
+    public static ChatCommunicator chatCommunicator=null;
+    public static String defaultHotSpotIPAddress="192.168.43.1";
 }

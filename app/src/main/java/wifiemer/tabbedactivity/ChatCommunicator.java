@@ -2,7 +2,10 @@ package wifiemer.tabbedactivity;
 
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -14,68 +17,66 @@ import java.net.Socket;
  */
 public class ChatCommunicator {
 
-        public String readAndWritefromClient(String wrString)
+    private Socket socket=null;
+    private String wifiHotSpot="";
+    private ServerSocket serverSocket=null;
+
+    public ChatCommunicator(String wifiHotSpot)
     {
         try {
-            ServerSocket serverSocket = new ServerSocket(8080);
-            Socket socket=null;
-
-            while(true)
-            {
-                socket=serverSocket.accept();
-                try
-                {
-                    InputStream inputStream=socket.getInputStream();
-                    PrintWriter printWriter=new PrintWriter(socket.getOutputStream());
-                    printWriter.println(wrString);
-                    BufferedReader br=new BufferedReader(new InputStreamReader(inputStream));
-                    String result=br.readLine();
-                    socket.close();
-                    return  result;
-                }
-                catch(Exception e)
-                {
-                    e.printStackTrace();
-                    System.out.println("Exception in getting the string from the client");
-                    return "Exception in getting the string from the client";
-                }
-            }
+            this.wifiHotSpot = wifiHotSpot;
+            socket = new Socket(this.wifiHotSpot, 8088);
         }
         catch(Exception e)
         {
+            System.out.println("Unable to open scoket");
             e.printStackTrace();
+
+            socket=null;
         }
-        return "TestString";
     }
 
+    public ChatCommunicator()
+    {
+        try
+        {
+            serverSocket=new ServerSocket(8088);
+            socket=serverSocket.accept();
 
+        }
+        catch(Exception e)
+        {
+            System.out.println("triggering ChatCommunicator() exception");
+            e.printStackTrace();
+        }
+    }
 
     public void readFromClient(final TextView textView)
     {
 
-        System.out.println("readfromClient");
+        System.out.println("triggering readfromClient");
 
         new Thread(new Runnable() {
             @Override
             public void run() {
 
                 try {
-                    ServerSocket serverSocket = new ServerSocket(8088);
-                    Socket socket=null;
+                    if(serverSocket==null)
+                     serverSocket = new ServerSocket(8088);
 
                     while(true)
                     {
+                        if(socket==null)
                         socket=serverSocket.accept();
+
                         System.out.println("accepting socket info");
                         try
                         {
                             InputStream inputStream=socket.getInputStream();
                             BufferedReader br=new BufferedReader(new InputStreamReader(inputStream));
                             String result=br.readLine();
-                            System.out.println("readString "+result);
+                            System.out.println("readString " + result);
                             textView.setText(result);
-                            socket.close();
-
                         }
                         catch(Exception e)
                         {
@@ -96,37 +97,34 @@ public class ChatCommunicator {
 
     }
 
-
-
-    public String readAndWriteFromServer(String writeString)
+    public void writeToClient(String writeString)
     {
+        System.out.println("triggering writeToClient");
 
         try
         {
+            if(serverSocket==null)
+                serverSocket=new ServerSocket(8088);
 
-            Socket socket=new Socket("192.168.0.109",8080);
-            InputStream inputStream=socket.getInputStream();
+            if(socket==null)
+                socket=serverSocket.accept();
 
-            BufferedReader br=new BufferedReader(new InputStreamReader(inputStream));
-            String result=br.readLine();
+            System.out.println("accepting socket info");
 
             PrintWriter printWriter=new PrintWriter(socket.getOutputStream());
 
             printWriter.println(writeString);
-
-            return result;
-
-
+            printWriter.close();
         }
         catch(Exception e)
         {
-         System.out.println("error in reading from the server");
+            System.out.println("writeToClient excpetion");
             e.printStackTrace();
-
         }
 
-        return "Error";
+
     }
+
 
 
     public void WriteToServer(final String writeString)
@@ -141,16 +139,14 @@ public class ChatCommunicator {
                 try
                 {
 
-                    Socket socket=new Socket("192.168.0.109",8088);
+                    if(socket==null)
+                     socket=new Socket(wifiHotSpot,8088);
 
 
                     PrintWriter  printWriter=new PrintWriter(socket.getOutputStream());
 
                     printWriter.println(writeString);
                     printWriter.close();
-                    socket.close();
-
-
 
                 }
                 catch(Exception e)
@@ -163,6 +159,52 @@ public class ChatCommunicator {
             }
         }).start();
 
+
+
+    }
+
+    public void ReadFromServer(TextView readTextView)
+    {
+        System.out.println("triggering readfromServer");
+
+        while(true) {
+            try {
+                if (socket == null)
+                    socket = new Socket(wifiHotSpot, 8088);
+
+                InputStream inputStream = socket.getInputStream();
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                String readString = bufferedReader.readLine();
+                readTextView.setText(readString);
+
+
+            } catch (Exception e) {
+                System.out.println("readfromServer exception");
+                e.printStackTrace();
+
+            }
+        }
+
+
+    }
+
+    public boolean socketClose()
+    {
+        try {
+            if (socket != null)
+                socket.close();
+
+            return true;
+        }
+        catch(Exception e)
+        {
+            System.out.println("unable to close socket");
+            e.printStackTrace();
+
+            return false;
+        }
 
 
     }
