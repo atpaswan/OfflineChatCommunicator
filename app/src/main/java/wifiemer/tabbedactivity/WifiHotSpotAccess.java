@@ -66,9 +66,11 @@ public class WifiHotSpotAccess {
 
     public boolean connectToHotspot(String hotSpotName,Context context)
     {
+        System.out.println("connectToHotspot called "+hotSpotName);
         WifiConfiguration conf=new WifiConfiguration();
-        conf.SSID=hotSpotName;
-        conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        conf.SSID="\"01"+hotSpotName+"\"";
+       // conf.preSharedKey="\"12345678\"";
+       conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiManager wifiManager=(WifiManager)context.getSystemService(Context.WIFI_SERVICE);
 
         if(!wifiManager.isWifiEnabled())
@@ -78,15 +80,18 @@ public class WifiHotSpotAccess {
         List<WifiConfiguration> wifiConfigurationList=wifiManager.getConfiguredNetworks();
 
         for(WifiConfiguration i:wifiConfigurationList)
+        wifiManager.disableNetwork(i.networkId);
+
+        for(WifiConfiguration i:wifiConfigurationList)
         {
-            if(i.SSID!=null && i.SSID.equals(hotSpotName))
+            if(i.SSID!=null && i.SSID.equals("\"01"+hotSpotName+"\""))
             {
                 try
                 {
                     wifiManager.disconnect();
                     wifiManager.enableNetwork(i.networkId, true);
                     wifiManager.reconnect();
-                    break;
+                    return true;
                 }
                 catch(Exception e)
                 {

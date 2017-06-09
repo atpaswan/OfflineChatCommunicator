@@ -393,7 +393,7 @@ private class WifiReceiver extends BroadcastReceiver {
             TextView textView = (TextView) rootView.findViewById(R.id.WifiName);
             textView.setText(wifiMessage.getWifiName());
 
-            TextView lastMessage = (TextView) rootView.findViewById(R.id.LastMessage);
+            final TextView lastMessage = (TextView) rootView.findViewById(R.id.LastMessage);
             lastMessage.setText(wifiMessage.getLastMessage());
 
            lastMessage.setOnClickListener(new View.OnClickListener() {
@@ -401,6 +401,7 @@ private class WifiReceiver extends BroadcastReceiver {
                public void onClick(View v) {
 
                    Intent intent=new Intent(getContext(),WifiMessageChatActivity.class);
+                   intent.putExtra("HotSpotName",lastMessage.getText());
                    System.out.println("Executing the activity movement");
                    startActivity(intent);
                }
