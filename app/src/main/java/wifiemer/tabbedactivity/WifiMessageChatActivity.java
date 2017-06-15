@@ -26,6 +26,7 @@ public class WifiMessageChatActivity extends Activity {
         final Button ReceivedMessageButton=(Button)findViewById(R.id.ReceivedMessageButton);
         final Button SendMessageButton=(Button)findViewById(R.id.SendMessageButton);
         final Button StartServerButton=(Button)findViewById(R.id.StartServerButton);
+        final Button StartReceivingButton=(Button)findViewById(R.id.StartReceivingButton);
 
         Intent intent=getIntent();
         wifiHotspotName=intent.getStringExtra("wifiHotSpot");
@@ -40,6 +41,29 @@ public class WifiMessageChatActivity extends Activity {
 
                 CommonVars.chatCommunicator = new ChatCommunicator();
                 isAServer = true;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommonVars.chatCommunicator.readFromClient(ReceivedTextView);
+                    }
+                }).start();
+            }
+        });
+
+        StartReceivingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                CommonVars.chatCommunicator=new ChatCommunicator(CommonVars.defaultHotSpotIPAddress);
+                isAServer=false;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        CommonVars.chatCommunicator.ReadFromServer(ReceivedTextView);
+
+                    }
+                }).start();
             }
         });
 
