@@ -1,5 +1,7 @@
 package wifiemer.tabbedactivity;
 
+import android.app.Activity;
+import android.content.Context;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
@@ -17,31 +19,18 @@ import java.net.Socket;
  */
 public class ChatCommunicator {
 
-    private Socket socket = null;
+
     private String wifiHotSpot = "";
-    private ServerSocket serverSocket = null;
+    private Activity activity;
+    public ChatCommunicator(String wifiHotSpot,Activity activity) {
 
-    public ChatCommunicator(String wifiHotSpot) {
-        try {
             this.wifiHotSpot = wifiHotSpot;
-            socket = new Socket(this.wifiHotSpot, 8088);
-        } catch (Exception e) {
-            System.out.println("Unable to open scoket");
-            e.printStackTrace();
-
-            socket = null;
-        }
+            this.activity=activity;
     }
 
-    public ChatCommunicator() {
-        try {
-            serverSocket = new ServerSocket(8088);
-            socket = serverSocket.accept();
+    public ChatCommunicator(Activity activity) {
+        this.activity=activity;
 
-        } catch (Exception e) {
-            System.out.println("triggering ChatCommunicator() exception");
-            e.printStackTrace();
-        }
     }
 
     public void readFromClient(final TextView textView) {
@@ -53,20 +42,31 @@ public class ChatCommunicator {
             public void run() {
 
                 try {
-                    if (serverSocket == null)
-                        serverSocket = new ServerSocket(8088);
+
+
 
                     while (true) {
-                        if (socket == null)
-                            socket = serverSocket.accept();
+
+                           ServerSocket serverSocket = new ServerSocket(8086);
+                           Socket socket = serverSocket.accept();
 
                         System.out.println("accepting socket info");
                         try {
                             InputStream inputStream = socket.getInputStream();
                             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-                            String result = br.readLine();
+                            final String result = br.readLine();
                             System.out.println("readString " + result);
-                            textView.setText(result);
+
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    textView.setText(result);
+                                }
+                            });
+                            socket.close();
+                            serverSocket.close();
+
                         } catch (Exception e) {
                             e.printStackTrace();
                             System.out.println("Exception in getting the string from the client");
@@ -87,11 +87,10 @@ public class ChatCommunicator {
         System.out.println("triggering writeToClient");
 
         try {
-            if (serverSocket == null)
-                serverSocket = new ServerSocket(8088);
 
-            if (socket == null)
-                socket = serverSocket.accept();
+            ServerSocket serverSocket = new ServerSocket(8087);
+
+                Socket socket = serverSocket.accept();
 
             System.out.println("accepting socket info");
 
@@ -99,6 +98,8 @@ public class ChatCommunicator {
 
             printWriter.println(writeString);
             printWriter.close();
+            socket.close();
+            serverSocket.close();
         } catch (Exception e) {
             System.out.println("writeToClient excpetion");
             e.printStackTrace();
@@ -118,14 +119,15 @@ public class ChatCommunicator {
 
                 try {
 
-                    if (socket == null)
-                        socket = new Socket(wifiHotSpot, 8088);
+                    Socket socket = new Socket(wifiHotSpot, 8086);
 
 
                     PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
 
                     printWriter.println(writeString);
                     printWriter.close();
+                    System.out.println("WritetoServer Complete");
+                    socket.close();
 
                 } catch (Exception e) {
                     System.out.println("error in writing to the server");
@@ -139,21 +141,30 @@ public class ChatCommunicator {
 
     }
 
-    public void ReadFromServer(TextView readTextView) {
+    public void ReadFromServer(final TextView readTextView) {
         System.out.println("triggering readfromServer");
+
+
 
         while (true) {
             try {
-                if (socket == null)
-                    socket = new Socket(wifiHotSpot, 8088);
+
+                Socket socket = new Socket(wifiHotSpot, 8087);
 
                 InputStream inputStream = socket.getInputStream();
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-                String readString = bufferedReader.readLine();
-                readTextView.setText(readString);
-
+                final String readString = bufferedReader.readLine();
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        readTextView.setText(readString);
+                    }
+                });
+                System.out.println("before closing socket");
+                socket.close();
+                System.out.println("readfrom Server complete");
 
             } catch (Exception e) {
                 System.out.println("readfromServer exception");
@@ -164,41 +175,5 @@ public class ChatCommunicator {
 
 
     }
-
-    public boolean socketClose() {
-        try {
-            if (socket != null) {
-                socket.close();
-                socket = null;
-            }
-
-            return true;
-        } catch (Exception e) {
-            System.out.println("unable to close socket");
-            e.printStackTrace();
-
-            return false;
-        }
-
-
-    }
-
-    public boolean serverSocketClose() {
-        try {
-            if (serverSocket != null) {
-                serverSocket.close();
-                serverSocket = null;
-            }
-
-            return true;
-        } catch (Exception e) {
-            System.out.println("serversocket close exception");
-            e.printStackTrace();
-            return false;
-        }
-
-
-    }
-
 
 }
