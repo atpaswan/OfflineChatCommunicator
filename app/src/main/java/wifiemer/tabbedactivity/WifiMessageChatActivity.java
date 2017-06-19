@@ -14,12 +14,13 @@ public class WifiMessageChatActivity extends Activity {
 
   private boolean isAServer=false;
   private String wifiHotspotName="";
-
+    private Activity activity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_window);
+        activity=this;
 
         final TextView ReceivedTextView=(TextView)findViewById(R.id.ReceivedTextView);
         final TextView SendTextView=(TextView)findViewById(R.id.SendTextView);
@@ -29,17 +30,23 @@ public class WifiMessageChatActivity extends Activity {
         final Button StartReceivingButton=(Button)findViewById(R.id.StartReceivingButton);
 
         Intent intent=getIntent();
-        wifiHotspotName=intent.getStringExtra("wifiHotSpot");
+        wifiHotspotName=intent.getStringExtra("HotSpotName");
 
-        (new WifiHotSpotAccess()).connectToHotspot(wifiHotspotName, getApplicationContext());
-
+        try {
+            (new WifiHotSpotAccess()).connectToHotspot(wifiHotspotName, getApplicationContext());
+        }
+        catch(Exception e)
+        {
+            System.out.println("catching connecToHotspot exception. Might have been the server ");
+            e.printStackTrace();
+        }
 
 
         StartServerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                CommonVars.chatCommunicator = new ChatCommunicator();
+                CommonVars.chatCommunicator = new ChatCommunicator(activity);
                 isAServer = true;
                 new Thread(new Runnable() {
                     @Override
@@ -54,13 +61,14 @@ public class WifiMessageChatActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                CommonVars.chatCommunicator=new ChatCommunicator(CommonVars.defaultHotSpotIPAddress);
+                CommonVars.chatCommunicator=new ChatCommunicator(CommonVars.defaultHotSpotIPAddress,activity);
                 isAServer=false;
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
 
                         CommonVars.chatCommunicator.ReadFromServer(ReceivedTextView);
+
 
                     }
                 }).start();
@@ -72,54 +80,25 @@ public class WifiMessageChatActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                if(isAServer)
-                {
-                    CommonVars.chatCommunicator.writeToClient(SendTextView.getText().toString());
-                }
-                else
-                {
-                    if(CommonVars.chatCommunicator==null)
-                    {
-                        CommonVars.chatCommunicator=new ChatCommunicator(CommonVars.defaultHotSpotIPAddress);
+                if (isAServer) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            CommonVars.chatCommunicator.writeToClient(SendTextView.getText().toString());
+
+                        }
+                    }).start();
+
+                } else {
+                    if (CommonVars.chatCommunicator == null) {
+                        CommonVars.chatCommunicator = new ChatCommunicator(CommonVars.defaultHotSpotIPAddress,activity);
                     }
 
                     CommonVars.chatCommunicator.WriteToServer(SendTextView.getText().toString());
                 }
             }
         });
-
-
-        (new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                if(isAServer)
-                {
-                    if(CommonVars.chatCommunicator==null)
-                        CommonVars.chatCommunicator=new ChatCommunicator();
-
-                    CommonVars.chatCommunicator.readFromClient(ReceivedTextView);
-                }
-                else
-                {
-                    if(CommonVars.chatCommunicator==null)
-                        CommonVars.chatCommunicator=new ChatCommunicator(CommonVars.defaultHotSpotIPAddress);
-
-                    CommonVars.chatCommunicator.ReadFromServer(ReceivedTextView);
-                }
-
-            }
-        })).start();
-
-
-
-
-
-
-
-
-
-
 
     }
 
