@@ -21,4 +21,6 @@ public class CommonVars {
     public static String selectedHotSpotName;
     public static ChatCommunicator chatCommunicator=null;
     public static String defaultHotSpotIPAddress="192.168.43.1";
+    public static List<SenderDevice> senderDeviceList=new ArrayList<SenderDevice>();
+    public static List<BroadCastMessage> broadCastMessageList=new ArrayList<BroadCastMessage>();
 }

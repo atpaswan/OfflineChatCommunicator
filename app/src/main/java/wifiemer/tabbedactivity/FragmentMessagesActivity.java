@@ -181,18 +181,6 @@ public class FragmentMessagesActivity extends Fragment {
 
     }
 
-    public void registerClickListener(final View rootView)
-    {
-        ListView listView=(ListView)rootView.findViewById(R.id.listView);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Snackbar.make(rootView, "You have clicked on the lauda item " + position, Snackbar.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     public void populateWifiMessageList() // this will determine what messages will be shown
     {
          wifiManager=(WifiManager)getContext().getSystemService(Context.WIFI_SERVICE);
