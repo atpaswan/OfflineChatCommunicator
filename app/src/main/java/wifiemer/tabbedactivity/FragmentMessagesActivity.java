@@ -2,41 +2,43 @@ package wifiemer.tabbedactivity;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.os.Build;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.text.Layout;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.database.sqlite.*;
 
-import java.io.BufferedWriter;
+import org.w3c.dom.Text;
+
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.security.Permission;
+import java.security.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 
 /**
  * Created by Atul on 2/26/2017.
@@ -45,12 +47,12 @@ public class FragmentMessagesActivity extends Fragment {
 
 
 
-    List<WifiMessage> wifiMessages=new ArrayList<WifiMessage>();
+    List<SenderDevice> senderDeviceList=new ArrayList<SenderDevice>();
+    List<BroadCastMessage> broadCastMessageList=new ArrayList<BroadCastMessage>();
     LayoutInflater inflater;
     WifiManager wifiManager;
     View rootView;
     boolean permissiongrant=true;
-    List<WifiMessage> wifiMessagesReceived=new ArrayList<WifiMessage>();
     static FragmentMessagesActivity fragmentObj;
     boolean restoreFlag=false;
     Activity mActivity;
@@ -66,31 +68,50 @@ public class FragmentMessagesActivity extends Fragment {
         super.onCreate(savedInstanceState);
 
         if(CommonVars.messageActivity) {
-            wifiMessages = CommonVars.wifiMessages;
-            wifiMessagesReceived = CommonVars.wifiMessagesReceived;
+            senderDeviceList = CommonVars.senderDeviceList;
+            broadCastMessageList = CommonVars.broadCastMessageList;
             CommonVars.messageActivity=false;
         }
-        else   // load the wifiMessagesReceived from the file
+        else   // load the senderDeviceList as well as broadCastMessageList from the Database
         {
             try {
-                FileInputStream fis = getContext().openFileInput(getResources().getString(R.string.wifi_FileName));
-                ObjectInputStream ois= new ObjectInputStream(fis);
-                wifiMessagesReceived =(List<WifiMessage>)ois.readObject();
 
-                for(int i=0;i<wifiMessagesReceived.size();i++)
-                    wifiMessages.add(wifiMessagesReceived.get(i));
+                SQLiteDatabase sqLiteDatabase=getContext().openOrCreateDatabase(CommonSettings.appDatabase, getActivity().MODE_PRIVATE, null);
 
-                System.out.println("reading wifiMessages");
+                sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS SENDER_DEVICE(MACID VARCHAR,IMAGEBYTES BLOB,ALIASNAME VARCHAR);");
+                sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS CHATMESSAGE(MACID VARCHAR,DATATYPE VARCHAR,DATA BLOB,MESSAGE VARCHAR,READCONDITION VARCHAR,TIMESTAMP VARCHAR,CHATTYPE CHAR);");
+                sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS BROADCASTMESSAGE(MACID VARCHAR,MESSAGE VARCHAR,REC_TIMESTAMP TIMESTAMP,UNENCSTRING VARCHAR);");
 
-                fis.close();
+
+                Cursor senderDeviceCursor=sqLiteDatabase.rawQuery("select * from sender_device",null);
+              //  Cursor broadCastMessageCursor=sqLiteDatabase.rawQuery("select * from broadcastmessage",null);
+
+                senderDeviceCursor.moveToFirst();
+
+                while(!senderDeviceCursor.isAfterLast())
+                {
+                    SenderDevice senderDevice=new SenderDevice(senderDeviceCursor.getString(0),senderDeviceCursor.getBlob(1),senderDeviceCursor.getString(2));
+                    senderDeviceList.add(senderDevice);
+
+                    Cursor broadCastMessageCursor=sqLiteDatabase.rawQuery("select  * from (select * from broadcastmessage where macid='"+senderDevice.getMacID()+"' order by rec_timestamp desc) limit 1",null);
+                    broadCastMessageCursor.moveToFirst();
+
+                    BroadCastMessage broadCastMessage=new BroadCastMessage(broadCastMessageCursor.getString(0),broadCastMessageCursor.getString(1),broadCastMessageCursor.getString(2),broadCastMessageCursor.getString(3));
+
+                    broadCastMessageList.add(broadCastMessage);
+                    senderDeviceCursor.moveToNext();
+                }
+
+                sqLiteDatabase.close();
+
             }
             catch(Exception e)
             {
-                System.out.println("wifiMessagesObject cannot be constructed");
+                System.out.println("Database cannot be read");
+                e.printStackTrace();
             }
 
         }
-
     }
 
     @Override
@@ -116,8 +137,8 @@ public class FragmentMessagesActivity extends Fragment {
 
     @Override
     public void onPause() {
-        CommonVars.wifiMessages=wifiMessages;
-        CommonVars.wifiMessagesReceived=wifiMessagesReceived;
+        CommonVars.senderDeviceList=senderDeviceList;
+        CommonVars.broadCastMessageList=broadCastMessageList;
         CommonVars.view=rootView;
         CommonVars.messageActivity=true;
         System.out.println("OnPause called");
@@ -128,24 +149,6 @@ public class FragmentMessagesActivity extends Fragment {
     public void onStop() {
         super.onStop();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-                    FileOutputStream fos = getContext().openFileOutput(getResources().getString(R.string.wifi_FileName),Context.MODE_PRIVATE);
-                    ObjectOutputStream oos=new ObjectOutputStream(fos);
-                    oos.writeObject(wifiMessagesReceived);
-                    fos.flush();
-                    fos.close();
-                }
-                catch(Exception e)
-                {
-                    System.out.println("error writing the wifi message to the file");
-                }
-
-            }
-        }).start();
     }
 
     @Override
@@ -207,19 +210,28 @@ public class FragmentMessagesActivity extends Fragment {
         System.out.println("populateListView");
         ListView listView=(ListView)rootView.findViewById(R.id.listView);
 
-        ArrayAdapter<WifiMessage> adapter=new WifiMessageAdapter(rootView.getContext(),R.layout.list_item,wifiMessages);
+        ArrayAdapter<SenderDevice> adapter=new SenderDeviceAdapter(rootView.getContext(),R.layout.list_item,senderDeviceList);
 
         listView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 }
 
+    public byte[] resourceToImageBytes(int resourceID)
+    {
+        Bitmap bitmap=BitmapFactory.decodeResource(getContext().getResources(),resourceID);
+        ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
+
+        bitmap.compress(Bitmap.CompressFormat.PNG,100,byteArrayOutputStream);
+
+        return byteArrayOutputStream.toByteArray();
+    }
 
 private class WifiReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, Intent intent) {
 
         if (android.os.Build.VERSION.SDK_INT >= 23) {
-            // only for marshamallow and newer versions
+            // only for marshasmallow and newer versions
 
             System.out.println("Entering permission grant");
 
@@ -239,14 +251,6 @@ private class WifiReceiver extends BroadcastReceiver {
         //(new CryptEncrypt()).performOp();
         System.out.println("After execute Op");
 
-        /*final ProgressDialog progress=new ProgressDialog(getContext());
-        progress.setMessage("Receving messages");
-        progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        progress.setIndeterminate(false);
-        progress.setProgress(20);
-        progress.show();
-        */
-
         new Thread()
         {
 
@@ -255,7 +259,10 @@ private class WifiReceiver extends BroadcastReceiver {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            wifiMessages.add(new WifiMessage("Wifi Scan results not available ", "nothing", R.drawable.alias_photo,new Date()));
+
+                            byte[] imageBytes=resourceToImageBytes(R.drawable.alias_photo);
+
+                           senderDeviceList.add(new SenderDevice("No Sender devices scanned",resourceToImageBytes(R.drawable.alias_photo),"No Results"));
                         }
                     });
 
@@ -268,7 +275,7 @@ private class WifiReceiver extends BroadcastReceiver {
 
                         Boolean addFlag = false;
                         String wifiString = scanResults.get(i).SSID.toString();
-                        try                                                      // try block for filtering the WIFI SSID to check if it is actually the message
+                        try                                                      // try block for filtering the WIFI SSID to check if it is actually the message decoding the encryption
                         {
 
                             byte[] encryptBytes = Base64.decode(wifiString, Base64.DEFAULT);
@@ -287,15 +294,15 @@ private class WifiReceiver extends BroadcastReceiver {
                         }
 
                         if (addFlag) {
-                            final WifiMessage wifiMessage = new WifiMessage(scanResults.get(i).BSSID.toString(),wifiString, R.drawable.alias_photo,new Date());
+                            final BroadCastMessage broadCastMessage=new BroadCastMessage(scanResults.get(i).BSSID,wifiString,(new SimpleDateFormat(CommonVars.defaultDateFormat)).format(new Date()),scanResults.get(i).SSID);
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if(getMessageAdded(wifiMessage)) {
-                                        System.out.println("wifi size "+wifiMessages.size());
-                                        wifiMessages.add(wifiMessage);
+                                    if(getMessageAdded(broadCastMessage)) {
+                                        System.out.println("broadcastmessage size " + broadCastMessageList.size());
+                                       // senderDeviceList.add(new SenderDevice(broadCastMessage.getMacID(),resourceToImageBytes(R.drawable.alias_photo),""));
                                         CommonVars.isItemAdded=true;
-                                        System.out.println("wifimessages added "+wifiMessages.size());
+                                        System.out.println("wifimessages added "+broadCastMessageList.size());
                                     }
                                 }
                             });
@@ -323,7 +330,6 @@ private class WifiReceiver extends BroadcastReceiver {
         }.start();
     }
 }
-
 
     public boolean isMessage(String wifiString)
     {
@@ -354,12 +360,12 @@ private class WifiReceiver extends BroadcastReceiver {
         }
     }
 
-    private class WifiMessageAdapter extends ArrayAdapter<WifiMessage> {
-    List<WifiMessage> wifiMessages;
+    private class SenderDeviceAdapter extends ArrayAdapter<SenderDevice> {
+    List<SenderDevice> senderDeviceListArg;
 
-    public WifiMessageAdapter(Context context, int positionm,List<WifiMessage> wifiMessages) {
-        super(context, R.layout.list_item, wifiMessages);
-        this.wifiMessages=wifiMessages;
+    public SenderDeviceAdapter(Context context, int position,List<SenderDevice> senderDeviceListArg) {
+        super(context, R.layout.list_item, senderDeviceListArg);
+        this.senderDeviceListArg=senderDeviceListArg;
 
     }
 
@@ -374,22 +380,34 @@ private class WifiReceiver extends BroadcastReceiver {
 
             ImageView imageView = (ImageView) rootView.findViewById(R.id.imageView);
 
-            WifiMessage wifiMessage = wifiMessages.get(position);
-
-            imageView.setImageResource(wifiMessage.getIcon_id());
+            final SenderDevice senderDevice=senderDeviceListArg.get(position);
+            Bitmap bitmap= BitmapFactory.decodeByteArray(senderDevice.getImageBytes(),0,senderDevice.getImageBytes().length);
+            imageView.setImageBitmap(bitmap);
 
             TextView textView = (TextView) rootView.findViewById(R.id.WifiName);
-            textView.setText(wifiMessage.getWifiName());
+            textView.setText(senderDevice.getMacID());
 
             final TextView lastMessage = (TextView) rootView.findViewById(R.id.LastMessage);
-            lastMessage.setText(wifiMessage.getLastMessage());
+            final TextView timestampTextView=(TextView)rootView.findViewById(R.id.LastTimeStampTextView);
+            final TextView wifiNameTextView=(TextView)rootView.findViewById(R.id.WifiName);
+
+            if(senderDevice.aliasName.equals(""))
+                wifiNameTextView.setText(senderDevice.getMacID());
+            else
+            wifiNameTextView.setText(senderDevice.getAliasName());
+
+            timestampTextView.setText(broadCastMessageList.get(position).getTimestamp());
+
+            lastMessage.setText(broadCastMessageList.get(position).getMessage());
+
+            final int currPosition=position;
 
            lastMessage.setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View v) {
 
-                   Intent intent=new Intent(getContext(),WifiMessageChatActivity.class);
-                   intent.putExtra("HotSpotName",lastMessage.getText());
+                   Intent intent=new Intent(getContext(),FragmentReceivedBroadcastActivity.class);
+                   intent.putExtra("macID",senderDeviceList.get(currPosition).getMacID());
                    System.out.println("Executing the activity movement");
                    startActivity(intent);
                }
@@ -401,108 +419,107 @@ private class WifiReceiver extends BroadcastReceiver {
     }
 };
 
-    public boolean getMessageAdded(final WifiMessage wifiMessage)   // to determine whether the filtered message is an already received message or not
+    public boolean getMessageAdded(BroadCastMessage broadCastMessage)   // to determine whether the filtered message is an already received message or not
     {
-        boolean isReceived=false;
+        boolean doAdd=true;
 
 
-        for(int i=0;i<wifiMessagesReceived.size();i++)
+        // just load all the BroadCastMessageObjects from the Db and compare them with the received arg
+
+        Boolean firstAdd=false;
+
+        SQLiteDatabase sqLiteDatabase= getContext().openOrCreateDatabase(CommonSettings.appDatabase, getActivity().MODE_PRIVATE, null);
+
+        Cursor broadCastCursor=sqLiteDatabase.rawQuery("select * from broadcastmessage where macid='" + broadCastMessage.getMacID() + "'", null);
+
+        System.out.println("getMessageAdded beg" + broadCastCursor.getCount());
+
+        if(broadCastCursor.getCount()==0)
         {
-            WifiMessage currWifiMessage=wifiMessagesReceived.get(i);
-            System.out.println("wifiMessage display: "+currWifiMessage.getLastMessage());
-
-            if(wifiMessage.getLastMessage().equals(currWifiMessage.getLastMessage()))
-            {
-                isReceived=true;
-                break;
-            }
+            String DbQuery="INSERT INTO SENDER_DEVICE VALUES(?,?,?)";
+            sqLiteDatabase.execSQL(DbQuery,new Object[]{broadCastMessage.getMacID(),resourceToImageBytes(R.drawable.alias_photo),""});
+            senderDeviceList.add(new SenderDevice(broadCastMessage.getMacID(), resourceToImageBytes(R.drawable.alias_photo), ""));
+            broadCastMessageList.add(broadCastMessage);
+            firstAdd=true;
         }
 
-        if (isReceived)
-        return false;
-        else {
-            wifiMessagesReceived.add(wifiMessage);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
 
-                    System.out.println("Calling insertAliasPersistData");
-                    insertAliasPersistData(wifiMessage);
-                }
-            }).start();
+        broadCastCursor.moveToFirst();
 
-            System.out.println("return true");
-            return true;
-        }
-    }
-
-
-
-
-
-    public void insertAliasPersistData(WifiMessage wifiMessage)
-    {
-        try {
-            FileInputStream fis = getContext().openFileInput(getResources().getString(R.string.aliasFileName));
-            ObjectInputStream ois=new ObjectInputStream(fis);
-            ArrayList<Alias> aliasArrayList=(ArrayList<Alias>)ois.readObject();
-            fis.close();
-
-            boolean foundFlag=false;
-            int size=aliasArrayList.size();
-
-            for(int i=0;i<size;i++)
-            {
-                Alias currAlias=aliasArrayList.get(i);
-
-                if(wifiMessage.getWifiName().equals(currAlias.getBroadcastID()))
-                {
-                    foundFlag=true;
-                    break;
-                }
-            }
-
-
-            if(!foundFlag)
-            {
-                Alias newAlias=new Alias(R.drawable.alias_photo,wifiMessage.getBSSID(),wifiMessage.getLastMessage());
-                aliasArrayList.add(newAlias);  // new AliasObject added after checking whether it is already present in the Alias Persist data
-
-                FileOutputStream fos=getContext().openFileOutput(getResources().getString(R.string.aliasFileName),Context.MODE_PRIVATE);
-                ObjectOutputStream oos=new ObjectOutputStream(fos);
-                oos.writeObject(aliasArrayList);     // persisting the new Alias data
-                System.out.println(aliasArrayList.size());
-                fos.flush();
-                fos.close();
-
-                ArrayList<Alias> aliasArrayList1=(new FragmentAliasActivity()).loadfromAliasFile();
-                aliasArrayList1=(new FragmentAliasActivity()).loadfromAliasFile();
-            }
-
-        }
-        catch(Exception e)
+        while(!broadCastCursor.isAfterLast())
         {
-            System.out.println("Error in writing the alias File for validation operations.");  // This means we need to create a new file for persisting the Alias Data
+            String arg1=broadCastCursor.getString(0);
+            String arg2=broadCastCursor.getString(1);
+            String arg3=broadCastCursor.getString(2);
+            String arg4=broadCastCursor.getString(3);
 
-            e.printStackTrace();
+            Date date1;
+            Date date2;
+
             try {
-                FileOutputStream fos = getContext().openFileOutput(getResources().getString(R.string.aliasFileName), Context.MODE_PRIVATE);
-                ObjectOutputStream oos=new ObjectOutputStream(fos);
-                ArrayList<Alias> arrayList=new ArrayList<Alias>();
-                Alias newAlias=new Alias(R.drawable.alias_photo,wifiMessage.getBSSID(),wifiMessage.getLastMessage());
-                arrayList.add(newAlias);
-                oos.writeObject(arrayList);
-                System.out.println("Completing writing the Alias persist data " + arrayList.size());
-
-                fos.flush();
-                fos.close();
+                 date1 = (new SimpleDateFormat(CommonVars.defaultDateFormat)).parse(arg3);
+                 date2=(new SimpleDateFormat(CommonVars.defaultDateFormat)).parse(broadCastMessage.getTimestamp());
             }
-            catch(Exception excp)
+            catch(Exception e)
             {
-                System.out.println("Error in creating the Alias file persist data");
+                System.out.println("Unhandled parse Exception in getMessageAdded");
+                e.printStackTrace();
+                continue;
+            }
+
+
+               if(arg2.equals(broadCastMessage.getMessage()))
+                {
+                    Calendar calendar= GregorianCalendar.getInstance();
+                    calendar.setTime(date1);
+                    calendar.add(GregorianCalendar.MINUTE, CommonSettings.intermediatedMinutesBetweenBroadCast);
+
+                    date1=new Date(calendar.getTimeInMillis());
+
+
+                    if(date1.compareTo(date2)<0)
+                        doAdd=true;
+                    else
+                        doAdd=false;
+                }
+
+            broadCastCursor.moveToNext();
+
+
+        }
+
+        if(doAdd)
+        {
+            String DbQuery="INSERT INTO BROADCASTMESSAGE VALUES(?,?,?,?)";
+            sqLiteDatabase.execSQL(DbQuery,new Object[]{broadCastMessage.getMacID(),broadCastMessage.getMessage(),broadCastMessage.getTimestamp(),broadCastMessage.getUnEncString()});
+
+            if(!firstAdd)
+            {
+                int position=-1;
+
+                for(int i=0;i<broadCastMessageList.size();i++)
+                {
+                    if(broadCastMessageList.get(i).getMacID().equals(broadCastMessage.getMacID()))
+                    {
+                        position=i;
+                        break;
+                    }
+                }
+
+                broadCastMessageList.remove(position);
+                broadCastMessageList.add(position,broadCastMessage);
             }
         }
+
+        sqLiteDatabase.close();
+
+        System.out.println("getMessageAdded completed "+doAdd);
+
+        return doAdd;
+
     }
+
+
 }
 
 

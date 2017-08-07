@@ -51,7 +51,7 @@ public class WifiMessageChatActivity extends Activity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        CommonVars.chatCommunicator.readFromClient(ReceivedTextView);
+                        CommonVars.chatCommunicator.readFromClient(ReceivedTextView,8086);
                     }
                 }).start();
             }
@@ -67,7 +67,7 @@ public class WifiMessageChatActivity extends Activity {
                     @Override
                     public void run() {
 
-                        CommonVars.chatCommunicator.ReadFromServer(ReceivedTextView);
+                        CommonVars.chatCommunicator.ReadFromServer(ReceivedTextView,8087);
 
 
                     }
@@ -85,7 +85,7 @@ public class WifiMessageChatActivity extends Activity {
                         @Override
                         public void run() {
 
-                            CommonVars.chatCommunicator.writeToClient(SendTextView.getText().toString());
+                            CommonVars.chatCommunicator.writeToClient(SendTextView.getText().toString(),8087);
 
                         }
                     }).start();
@@ -95,7 +95,7 @@ public class WifiMessageChatActivity extends Activity {
                         CommonVars.chatCommunicator = new ChatCommunicator(CommonVars.defaultHotSpotIPAddress,activity);
                     }
 
-                    CommonVars.chatCommunicator.WriteToServer(SendTextView.getText().toString());
+                    CommonVars.chatCommunicator.WriteToServer(SendTextView.getText().toString(),8086);
                 }
             }
         });

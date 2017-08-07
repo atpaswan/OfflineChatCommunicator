@@ -3,7 +3,9 @@ package wifiemer.tabbedactivity;
 import android.content.BroadcastReceiver;
 import android.view.View;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,4 +25,11 @@ public class CommonVars {
     public static String defaultHotSpotIPAddress="192.168.43.1";
     public static List<SenderDevice> senderDeviceList=new ArrayList<SenderDevice>();
     public static List<BroadCastMessage> broadCastMessageList=new ArrayList<BroadCastMessage>();
+    public static String defaultDateFormat="yyyy-MM-dd hh:mm:ss";
+    public static String macID="macID";
+
+    public static String getPresentTime()
+    {
+        return (new SimpleDateFormat(CommonVars.defaultDateFormat)).format(new Date());
+    }
 }

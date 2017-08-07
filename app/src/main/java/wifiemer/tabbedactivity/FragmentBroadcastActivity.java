@@ -2,6 +2,7 @@ package wifiemer.tabbedactivity;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Base64;
@@ -210,6 +211,18 @@ public class FragmentBroadcastActivity extends Fragment{
 
                 }
             });
+
+            Button ForwardButton=(Button)convertView.findViewById(R.id.ForwardButton);
+
+            ForwardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent=new Intent(getContext(),BroadcastDiscussActivity.class);
+                intent.putExtra("macID","self");
+                startActivity(intent);
+            }
+        });
 
             textView2.setText(childString);
 
