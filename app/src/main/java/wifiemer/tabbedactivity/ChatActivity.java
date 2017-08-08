@@ -82,6 +82,8 @@ public class ChatActivity extends Activity {
                 wifiName=(new ChatCommunicator("",activity)).getWifiName(macID,getApplicationContext());
                 boolean result=(new WifiHotSpotAccess()).connectToHotspot(wifiName,getApplicationContext());
 
+                System.out.println("trying to connect to the wifiName "+wifiName+" ,"+result+" macID: "+macID);
+
                 String display="";
 
                 if(!result)
