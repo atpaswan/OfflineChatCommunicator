@@ -260,9 +260,9 @@ private class WifiReceiver extends BroadcastReceiver {
                         @Override
                         public void run() {
 
-                            byte[] imageBytes=resourceToImageBytes(R.drawable.alias_photo);
+                          //  byte[] imageBytes=resourceToImageBytes(R.drawable.alias_photo);
 
-                           senderDeviceList.add(new SenderDevice("No Sender devices scanned",resourceToImageBytes(R.drawable.alias_photo),"No Results"));
+                          // senderDeviceList.add(new SenderDevice("No Sender devices scanned",resourceToImageBytes(R.drawable.alias_photo),"No Results"));
                         }
                     });
 
@@ -318,7 +318,9 @@ private class WifiReceiver extends BroadcastReceiver {
                         public void run() {
                            // progress.setProgress(100);
                             if(CommonVars.isItemAdded)
-                            populateListViews(rootView);
+                            {
+                                populateListViews(rootView);
+                            }
 
                             wifiManager.startScan();
                         }
