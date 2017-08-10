@@ -243,6 +243,7 @@ public class ChatCommunicator {
 
         for(int i=0;i<scanResultList.size();i++)
         {
+            System.out.println("ScanResult BSSID "+scanResultList.get(i).BSSID.toString());
             if(scanResultList.get(i).BSSID.toString().equals(macID))
                 return scanResultList.get(i).SSID.toString();
         }
