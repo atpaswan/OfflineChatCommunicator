@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+"
+        android:id="@+id/NavButton"
+        android:layout_gravity="right" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_marginTop="20sp"
+        android:layout_marginBottom="20sp"
+        android:paddingBottom="40dp"
+        android:id="@+id/senderListView"
+        android:footerDividersEnabled="true"
+        android:divider="#cec9c9"
+        android:headerDividersEnabled="true"
+        android:contextClickable="false"
+        android:dividerHeight="2dp"
+        android:outlineProvider="bounds" />
+</LinearLayout>
+
