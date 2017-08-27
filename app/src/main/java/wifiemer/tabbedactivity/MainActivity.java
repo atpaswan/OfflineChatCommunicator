@@ -116,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
 
                 case 2: return FragmentBroadcastActivity.newInstance();
 
-
                 default:
                     return null;
             }
@@ -125,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            return 4;
         }
 
         @Override
@@ -139,6 +138,8 @@ public class MainActivity extends AppCompatActivity {
                     return "ALIAS";
                 case 2:
                     return "BROADCAST";
+                case 3:
+                    return "SENT";
             }
             return null;
         }

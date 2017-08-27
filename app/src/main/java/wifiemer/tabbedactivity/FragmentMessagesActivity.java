@@ -304,7 +304,7 @@ private class WifiReceiver extends BroadcastReceiver {
                                         CommonVars.isItemAdded=true;
                                         System.out.println("wifimessages added "+broadCastMessageList.size());
                                     }
-                                }
+                                 }
                             });
 
 
