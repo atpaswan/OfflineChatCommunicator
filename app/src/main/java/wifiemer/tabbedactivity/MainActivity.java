@@ -116,6 +116,8 @@ public class MainActivity extends AppCompatActivity {
 
                 case 2: return FragmentBroadcastActivity.newInstance();
 
+                case 3:return FragmentSentActivity.newInstance(null,null);
+
                 default:
                     return null;
             }

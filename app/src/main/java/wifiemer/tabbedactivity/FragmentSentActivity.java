@@ -7,6 +7,10 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -23,11 +27,14 @@ public class FragmentSentActivity extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+    List<BroadCastMessage> broadCastMessageList=new ArrayList<BroadCastMessage>();
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    View rootView;
 
     public FragmentSentActivity() {
         // Required empty public constructor
@@ -58,13 +65,22 @@ public class FragmentSentActivity extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_sent, container, false);
+        rootView=inflater.inflate(R.layout.fragment_sent, container, false);
+        broadCastMessageList=BroadCastMessage.getBroadCastList("select  * from (select * from broadcastmessage where macid='self' order by rec_timestamp desc) limit 1",getContext());
+
+        MeBroadCastMessageAdapter meBroadCastMessageAdapter=new MeBroadCastMessageAdapter(getContext(),0,broadCastMessageList);
+        ListView listView=(ListView)rootView.findViewById(R.id.sentListView);
+        listView.setAdapter(meBroadCastMessageAdapter);
+
+        return (rootView);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -80,8 +96,8 @@ public class FragmentSentActivity extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+           /* throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");*/
         }
     }
 
