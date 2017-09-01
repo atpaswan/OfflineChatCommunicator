@@ -5,4 +5,7 @@
     <string name="wifi_FileName">WifiSerData</string>
     <string name="aliasFileName">AliasSerData</string>
     <string name="title_activity_wifi_message_chat">WifiMessageChatActivity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
