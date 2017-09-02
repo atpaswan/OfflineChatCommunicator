@@ -68,7 +68,7 @@ public class BroadcastDiscussActivity extends Activity {
             ImageView imageView=(ImageView)view.findViewById(R.id.imageView);
             TextView wifiNameTextView=(TextView)view.findViewById(R.id.WifiName);
             TextView LastMessageTextView=(TextView)view.findViewById(R.id.LastMessage);
-            TextView LastTimeStampTextView=(TextView)view.findViewById(R.id.LastTimeStampTextView);
+            TextView LastTimeStampTextView=(TextView)view.findViewById(R.id.timestampTextView);
 
             imageView.setImageResource(R.drawable.image001);
             wifiNameTextView.setText("SELF");

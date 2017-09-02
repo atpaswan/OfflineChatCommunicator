@@ -74,7 +74,7 @@ public class FragmentSentActivity extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView=inflater.inflate(R.layout.fragment_sent, container, false);
-        broadCastMessageList=BroadCastMessage.getBroadCastList("select  * from (select * from broadcastmessage where macid='self' order by rec_timestamp desc) limit 1",getContext());
+        broadCastMessageList=BroadCastMessage.getBroadCastList("select * from broadcastmessage where macid='self' order by rec_timestamp desc",getContext());
 
         MeBroadCastMessageAdapter meBroadCastMessageAdapter=new MeBroadCastMessageAdapter(getContext(),0,broadCastMessageList);
         ListView listView=(ListView)rootView.findViewById(R.id.sentListView);

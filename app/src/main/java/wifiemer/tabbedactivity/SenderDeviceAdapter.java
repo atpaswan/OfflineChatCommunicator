@@ -85,7 +85,7 @@ public class SenderDeviceAdapter extends ArrayAdapter<SenderDevice> {
         textView.setText(senderDevice.getMacID());
 
         final TextView lastMessage = (TextView) rootView.findViewById(R.id.LastMessage);
-        final TextView timestampTextView=(TextView)rootView.findViewById(R.id.LastTimeStampTextView);
+        final TextView timestampTextView=(TextView)rootView.findViewById(R.id.timestampTextView);
         final TextView wifiNameTextView=(TextView)rootView.findViewById(R.id.WifiName);
 
         if(senderDevice.aliasName.equals(""))

@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.support.v4.app.Fragment;
@@ -25,14 +24,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.database.sqlite.*;
 
-import org.w3c.dom.Text;
-
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.security.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -390,7 +382,7 @@ private class WifiReceiver extends BroadcastReceiver {
             textView.setText(senderDevice.getMacID());
 
             final TextView lastMessage = (TextView) rootView.findViewById(R.id.LastMessage);
-            final TextView timestampTextView=(TextView)rootView.findViewById(R.id.LastTimeStampTextView);
+            final TextView timestampTextView=(TextView)rootView.findViewById(R.id.timestampTextView);
             final TextView wifiNameTextView=(TextView)rootView.findViewById(R.id.WifiName);
 
             if(senderDevice.aliasName.equals(""))

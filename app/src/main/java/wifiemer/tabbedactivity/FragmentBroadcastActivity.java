@@ -203,6 +203,8 @@ public class FragmentBroadcastActivity extends Fragment{
 
                     WifiHotSpotAccess wifiHotSpotAccess = new WifiHotSpotAccess();
                     boolean getState = wifiHotSpotAccess.setHotspotwithName(enterString, getContext());
+                    BroadCastMessage broadCastMessage=new BroadCastMessage("self",enterString,CommonVars.getPresentTime(),"");
+                    BroadCastMessage.insertIntoDatabase(broadCastMessage,getContext());
 
                     if (getState) {
                         System.out.println("Hotspot triggered");

@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.lang.reflect.Array;
@@ -42,11 +43,13 @@ public class MeBroadCastMessageAdapter extends ArrayAdapter<BroadCastMessage> {
         }
             TextView broadCastShowTextView = (TextView) view.findViewById(R.id.LastMessage);
             TextView timeStampTextView = (TextView) view.findViewById(R.id.timestampTextView);
+            ImageView imageView=(ImageView)view.findViewById(R.id.imageView);
 
             BroadCastMessage broadCastMessage = broadCastMessageList.get(position);
 
             broadCastShowTextView.setText(broadCastMessage.getMessage());
             timeStampTextView.setText(broadCastMessage.getTimestamp());
+            imageView.setImageResource(R.drawable.ic_satellite_black_48dp);
 
             return view;
 
