@@ -32,7 +32,7 @@ public class ChatActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-        activity=this;
+                        activity=this;
 
         final ListView listview=(ListView)findViewById(R.id.chatListView);
 

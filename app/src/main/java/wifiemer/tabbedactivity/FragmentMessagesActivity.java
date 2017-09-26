@@ -31,6 +31,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.annotations.*;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+
+
 
 /**
  * Created by Atul on 2/26/2017.
@@ -336,9 +342,61 @@ private class WifiReceiver extends BroadcastReceiver {
     public String extractMessage(String wifiString)
     {
         String formatString=wifiString.charAt(0)+wifiString.charAt(1)+"";
+        String actString=wifiString.substring(2,wifiString.length());
         int formatPos=Integer.parseInt(formatString);
 
-        return wifiString.substring(2);
+        List<SendingType> sendingTypeList=(new SendingType()).getSendingTypeList();
+
+        SendingCode sendingCode=SendingType.getSendingType(sendingTypeList, formatPos);
+
+        String fieldSeparator=sendingCode.getFieldSeparator();
+        String[] fieldSeparatorString=fieldSeparator.split("_");
+        int[]  fieldSeparatorInt=new int[fieldSeparatorString.length];
+        int curr=0;
+
+        for(String s:fieldSeparatorString)
+        {
+            fieldSeparatorInt[curr] = Integer.parseInt(s);
+            curr++;
+        }
+
+        String[] fieldString=new String[fieldSeparatorInt.length];
+        int lastCurr=0;
+
+        for(int i=0;i<fieldSeparatorInt.length;i++)
+        {
+           fieldString[i]=wifiString.substring(lastCurr,fieldSeparatorInt[i]);
+            lastCurr+=fieldSeparatorInt[i];
+
+            String ignoredString="";
+
+            for(int j=0;j<fieldString[i].length();j++)
+            {
+                if(fieldString[i].charAt(j)!='\n')
+                    ignoredString+=fieldString[i].charAt(j);
+            }
+
+            fieldString[i]=ignoredString;
+        }
+
+        String writeString=sendingCode.getWriteString();
+        char replacementCode=sendingCode.getReplacementCode();
+        String resultString="";
+        int incCounter=0;
+
+        for(int i=0;i<writeString.length();i++)
+        {
+            if(writeString.charAt(i)!=replacementCode)
+                resultString+=writeString.charAt(i);
+            else
+            {
+                resultString+=fieldString[incCounter];
+                incCounter++;
+            }
+        }
+
+
+        return resultString;
     }
 
     @Override

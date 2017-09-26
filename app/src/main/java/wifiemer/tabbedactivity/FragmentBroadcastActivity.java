@@ -5,10 +5,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,9 +18,18 @@ import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.annotations.*;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+
+import org.w3c.dom.Text;
 
 /**
  * Created by Atul on 2/26/2017.
@@ -28,6 +39,7 @@ public class FragmentBroadcastActivity extends Fragment{
     ArrayList<String> listHeader=new ArrayList<String>();
     HashMap<String,List<String>> childNodeList=new HashMap<String,List<String>>();
     LayoutInflater inflater;
+    List<SendingType> sendingTypeList=null;
 
     public static FragmentBroadcastActivity newInstance() {
         FragmentBroadcastActivity fragment = new FragmentBroadcastActivity();
@@ -44,6 +56,7 @@ public class FragmentBroadcastActivity extends Fragment{
 
 
 
+
         populateArrList();
         populatelistView(rootView);
 
@@ -53,7 +66,7 @@ public class FragmentBroadcastActivity extends Fragment{
     public void populatelistView(View rootView)
     {
         ExpandableListView expandableListView=(ExpandableListView)rootView.findViewById(R.id.expandableListView);
-        BaseExpandableListAdapter baseExpandableListAdapter=new BroadCastItemAdapter(rootView.getContext(),listHeader,childNodeList);
+        BaseExpandableListAdapter baseExpandableListAdapter=new BroadCastItemAdapter(rootView.getContext(),sendingTypeList);
 
         expandableListView.setAdapter(baseExpandableListAdapter);
 
@@ -61,46 +74,39 @@ public class FragmentBroadcastActivity extends Fragment{
 
     public void populateArrList()
     {
-        listHeader=new ArrayList<String>();
-        String headerItem1="ALERTS";
-        String headerItem2="WARNINGS";
-        String headerItem3="HAPPY SITUATION";
-        String headerItem4="SAD SITUATION";
 
-        listHeader.add(headerItem1);
-        listHeader.add(headerItem2);
-        listHeader.add(headerItem3);
-        listHeader.add(headerItem4);
+        SendingCodes readCodes=null;
+        try
+        {
+            InputStream is=getResources().openRawResource(R.raw.sendingcodeload);
+            InputStreamReader inputStreamReader=new InputStreamReader(is);
 
-        List<String> subs=new ArrayList<String>();
+            String jSon="";
+            int ch;
+            while(( ch=inputStreamReader.read())!=-1)
+            {
+                jSon+=(char)ch;
+            }
+            System.out.println("jSon Read\n" + jSon);
+            Gson gson=new Gson();
+            Type type=new TypeToken<SendingCodes>(){}.getType();
+            readCodes=gson.fromJson(jSon,type);
 
-        subs.add("A PERSON NAMED KALLU IS IN 50  METRES DIAMETER OF THIS AREAS");
-        subs.add("Ineligible");
+            SendingType[] sendingtypeArr=readCodes.getTypeArr();
 
-        childNodeList.put(headerItem1, subs);
+            sendingTypeList=new ArrayList<SendingType>();
 
-        subs=new ArrayList<String>();
+            for(int i=0;i<sendingtypeArr.length;i++)
+                sendingTypeList.add(sendingtypeArr[i]);
 
-        subs.add(" PLEASE KEEP AWAY FROM THIS PLACE. THERE ARE ZOMBIES HERE");
-        subs.add("Ineligible");
-
-        childNodeList.put(headerItem2, subs);
-
-        subs=new ArrayList<String>();
-
-        subs.add("A PERSON NAMED SASURA HAS A BIRTHDAY CELEBRATION WITHIN 50 METRES OF THIS VICINITY");
-        subs.add("Ineligible");
-
-        childNodeList.put(headerItem3,subs);
-
-        subs=new ArrayList<String>();
-
-        subs.add(" A PERSON NAMED SASURA HAS DIED WITHIN 50 METRES OF THIS VICINITY. PLEASE STAY QUIET");
-        subs.add("Ineligible");
-        childNodeList.put(headerItem4,subs);
-
-
-
+            inputStreamReader.close();
+            is.close();
+        }
+        catch(Exception e)
+        {
+            System.out.println("can't read the sendingCodes");
+            e.printStackTrace();
+        }
 
     }
 
@@ -108,28 +114,29 @@ public class FragmentBroadcastActivity extends Fragment{
 
     private class BroadCastItemAdapter extends BaseExpandableListAdapter
     {
-        public BroadCastItemAdapter(Context context,List<String> listheader,HashMap<String,List<String>> childNodesList) {
+        public BroadCastItemAdapter(Context context,List<SendingType> sendingTypeList) {
             super();
         }
 
         @Override
         public int getGroupCount() {
-            return listHeader.size();
+            return sendingTypeList.size();
         }
 
         @Override
         public Object getGroup(int groupPosition) {
-            return listHeader.get(groupPosition);
+            return sendingTypeList.get(groupPosition);
         }
 
         @Override
         public int getChildrenCount(int groupPosition) {
-            return childNodeList.get(listHeader.get(groupPosition)).size();
+            return sendingTypeList.get(groupPosition).getCodeArr().length;
         }
 
         @Override
         public Object getChild(int groupPosition, int childPosition) {
-            return childNodeList.get(listHeader.get(groupPosition));
+            SendingCode[] sendingCodeArr= sendingTypeList.get(groupPosition).getCodeArr();
+            return sendingCodeArr[childPosition];
         }
 
         @Override
@@ -150,87 +157,194 @@ public class FragmentBroadcastActivity extends Fragment{
         @Override
         public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
         {
-            if(convertView==null)
+
+            SendingCode[] sendingCodeArr=sendingTypeList.get(groupPosition).getCodeArr();
+            final SendingCode sendingCode=sendingCodeArr[childPosition];
+
+            final int fieldCount=sendingCode.getFieldNumber();
+
+            switch(fieldCount)
             {
-                convertView=inflater.inflate(R.layout.unit_item,parent,false);
+                case 1:{ convertView=inflater.inflate(R.layout.sendcodeload_item1,null); Contextify(1,convertView,sendingCode);break;}
+                case 2:{ convertView=inflater.inflate(R.layout.sendcodeload_item2,null); Contextify(2,convertView,sendingCode);break;}
+                case 3:{ convertView=inflater.inflate(R.layout.sendcodeload_item3,null);Contextify(3,convertView,sendingCode); break;}
+                case 4:{ convertView=inflater.inflate(R.layout.sendcodeload_item4,null);Contextify(4,convertView,sendingCode); break;}
+                case 5:{ convertView=inflater.inflate(R.layout.sendcodeload_item5,null); Contextify(5,convertView,sendingCode);break;}
+                default:{ convertView=inflater.inflate(R.layout.sendcodeload_item1,null);Contextify(sendingCode.getFieldNumber(),convertView,sendingCode); break;}
+
             }
 
-
-
-            String childString=childNodeList.get(listHeader.get(groupPosition)).get(childPosition);
-
-            TextView textView2=(TextView)convertView.findViewById(R.id.textView2);
-            final EditText inputText=(EditText)convertView.findViewById(R.id.inputText);
             Button sendButton=(Button)convertView.findViewById(R.id.sendButton);
+            final View view=convertView;
 
-            String input1=inputText.getText().toString();
-
-            String[][] passWord=new String[4][4];
-
-            String pass="SamarthSenaSuraksha";
-
-            for(int i=0;i<4;i++)
-            {
-                for(int j=0;j<4;j++)
-                    passWord[i][j]=pass+(i+1)+(j+1);  // filling the passWord array with the appropriate variations
-
-            }
-
-            System.out.println(sendButton.getText() + " sendbutton");
-
-           sendButton.setOnClickListener(new View.OnClickListener() {   // Triggering the hotspot with the given input characteristics using the send button
+            sendButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    System.out.println(" EnterString: " );
 
+                    String[] messages=new String[fieldCount];
 
-                    if(inputText==null)
-                        System.out.println("currentEdittext null");
-
-                if(inputText!=null) {
-                    String enterString = "01"+inputText.getText().toString();
-
-                 /*   try {
-                        byte[] encryptebytes = (new CryptEncrypt()).Encrypt(enterString);
-                        enterString= Base64.encodeToString(encryptebytes,Base64.DEFAULT);
-                    }
-                    catch(Exception e)
+                    for(int i=0;i<fieldCount;i++)
                     {
+                        String key="";
+                        TextView textView=null;
 
-                    } */
+                        if(i==0)
+                         textView=(TextView)view.findViewById(R.id.textView1);
+                        else if(i==1)
+                            textView=(TextView)view.findViewById(R.id.textView2);
+                        else if(i==2)
+                            textView=(TextView)view.findViewById(R.id.textView3);
+                        else if(i==3)
+                            textView=(TextView)view.findViewById(R.id.textView4);
+                        else if(i==4)
+                            textView=(TextView)view.findViewById(R.id.textView5);
+                        else
+                            textView=(TextView)view.findViewById(R.id.textView6);
 
-                    System.out.println("Entering if"+enterString);
+                        key=textView.getText().toString();
 
-                    WifiHotSpotAccess wifiHotSpotAccess = new WifiHotSpotAccess();
-                    boolean getState = wifiHotSpotAccess.setHotspotwithName(enterString, getContext());
-                    BroadCastMessage broadCastMessage=new BroadCastMessage("self",enterString,CommonVars.getPresentTime(),"");
-                    BroadCastMessage.insertIntoDatabase(broadCastMessage,getContext());
-
-                    if (getState) {
-                        System.out.println("Hotspot triggered");
+                        messages[i]=key;
                     }
-                }
+
+                    String BuiltMessage=buildMessage(messages,sendingCode);
 
                 }
             });
 
-            Button ForwardButton=(Button)convertView.findViewById(R.id.ForwardButton);
-
-            ForwardButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Intent intent=new Intent(getContext(),BroadcastDiscussActivity.class);
-                intent.putExtra("macID","self");
-                startActivity(intent);
-            }
-        });
-
-            textView2.setText(childString);
-
-           return convertView;
+            return convertView;
 
         }
+
+        public String buildMessage(String[] messages,SendingCode sendingCode)
+        {
+            int fieldCount=sendingCode.getFieldNumber();
+            String[] fieldSeparator=sendingCode.getFieldSeparator().split("_");
+
+            String fieldString="";
+
+            if(fieldCount<10)
+                fieldString="0"+fieldCount;
+            else
+            fieldString=fieldCount+"";
+
+            String builtMessage=fieldString+"";
+
+            for(int i=0;i<fieldCount;i++)
+            {
+                builtMessage+=padOrLimit(messages[i],Integer.parseInt(fieldSeparator[i]));
+            }
+
+            return  builtMessage;
+
+        }
+
+        public String padOrLimit(String uncheckedString,int limit)
+        {
+            if(uncheckedString.length()>=limit)
+                return uncheckedString.substring(0,limit);
+            else
+            {
+                int remLen=limit-uncheckedString.length();
+                String padString="";
+                for(int i=1;i<=remLen;i++)
+                    padString+="\n";
+
+                uncheckedString+=padString;
+
+                return  uncheckedString;
+            }
+        }
+
+        public void Contextify(int fieldNumber,View convertView,SendingCode sendingCode)
+        {
+            String parseString=sendingCode.getWriteString();
+            String fieldSeparator=sendingCode.getFieldSeparator();
+
+            String[] fieldSeparatorArr=fieldSeparator.split("_");
+            int[] fieldSeparatorInt=new int[fieldSeparatorArr.length];
+            for(int i=0;i<fieldSeparatorArr.length;i++)
+                fieldSeparatorInt[i]=Integer.parseInt(fieldSeparatorArr[i]);
+
+            List<String> sepStrings=Parsify(parseString,sendingCode.getReplacementCode());
+
+            System.out.println("Calling Contextify :"+fieldNumber);
+            if(fieldNumber>=1)
+            {
+                TextView textView1=(TextView)convertView.findViewById(R.id.textView1);
+                TextView textView2=(TextView)convertView.findViewById(R.id.textView2);
+                EditText editText1=(EditText)convertView.findViewById(R.id.editText1);
+                editText1.setImeOptions(EditorInfo. IME_ACTION_NEXT);
+                textView1.setText(sepStrings.get(0));
+                //editText1.setFilters(new InputFilter[]{new InputFilter.LengthFilter(fieldSeparatorInt[0])});
+                textView2.setText(sepStrings.get(1));
+            }
+
+            if(fieldNumber>=2)
+            {
+                TextView textView3=(TextView)convertView.findViewById(R.id.textView3);
+                EditText editText2=(EditText)convertView.findViewById(R.id.editText2);
+
+                //editText2.setFilters(new InputFilter[]{new InputFilter.LengthFilter(fieldSeparatorInt[1])});
+                textView3.setText(sepStrings.get(2));
+            }
+
+            if(fieldNumber>=3)
+            {
+                TextView textView4=(TextView)convertView.findViewById(R.id.textView4);
+                textView4.setText(sepStrings.get(3));
+
+                EditText editText3=(EditText)convertView.findViewById(R.id.editText3);
+                editText3.setFilters(new InputFilter[]{new InputFilter.LengthFilter(fieldSeparatorInt[2])});
+            }
+
+            if(fieldNumber>=4)
+            {
+                TextView textView5=(TextView)convertView.findViewById(R.id.textView5);
+                textView5.setText(sepStrings.get(4));
+
+                EditText editText4=(EditText)convertView.findViewById(R.id.editText4);
+                editText4.setFilters(new InputFilter[]{new InputFilter.LengthFilter(fieldSeparatorInt[3])});
+            }
+
+            if(fieldNumber>=5)
+            {
+                TextView textView6=(TextView)convertView.findViewById(R.id.textView6);
+                textView6.setText(sepStrings.get(5));
+
+                EditText editText5=(EditText)convertView.findViewById(R.id.editText5);
+                editText5.setFilters(new InputFilter[]{new InputFilter.LengthFilter(fieldSeparatorInt[4])});
+            }
+        }
+
+        public List<String> Parsify(String parseString,char replacementCode)
+        {
+            List<String> parseStringList=new ArrayList<String>();
+
+            System.out.println("parseString "+parseString);
+
+            for(int i=0;i<parseString.length();i++)
+            {
+                String word="";
+
+                while(parseString.charAt(i)!=replacementCode)
+                {
+                    word+=parseString.charAt(i);
+                    i++;
+                    if(i>=parseString.length())
+                        break;
+                }
+
+                parseStringList.add(word);
+            }
+
+            for(int i=0;i<parseStringList.size();i++)
+            {
+                System.out.println("parseList: "+parseStringList.get(i).toString());
+            }
+            return  parseStringList;
+
+        }
+
 
         @Override
         public boolean isChildSelectable(int groupPosition, int childPosition) {
@@ -239,6 +353,8 @@ public class FragmentBroadcastActivity extends Fragment{
 
         @Override
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+
+            SendingType sendingType=sendingTypeList.get(groupPosition);
             if(convertView==null)
             {
                 convertView=inflater.inflate(R.layout.list_group,parent,false);
@@ -246,7 +362,7 @@ public class FragmentBroadcastActivity extends Fragment{
             }
 
 
-            String groupString=listHeader.get(groupPosition);
+            String groupString=sendingType.getTypeString();
 
             TextView textView=(TextView)convertView.findViewById(R.id.textView);
 
