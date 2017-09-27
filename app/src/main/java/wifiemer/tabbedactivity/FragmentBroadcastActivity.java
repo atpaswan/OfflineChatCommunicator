@@ -180,6 +180,8 @@ public class FragmentBroadcastActivity extends Fragment{
 
                     String[] messages=new String[fieldCount];
 
+                    System.out.println("entering sendButton");
+
                     for(int i=0;i<fieldCount;i++)
                     {
                         String key="";
@@ -217,6 +219,7 @@ public class FragmentBroadcastActivity extends Fragment{
 
         public String buildMessage(String[] messages,SendingCode sendingCode)
         {
+            System.out.println("Entering BuildMessage");
             int fieldCount=sendingCode.getFieldNumber();
             String[] fieldSeparator=sendingCode.getFieldSeparator().split("_");
 
@@ -240,6 +243,7 @@ public class FragmentBroadcastActivity extends Fragment{
 
         public String padOrLimit(String uncheckedString,int limit)
         {
+            System.out.println("Entering padorLimit ");
             if(uncheckedString.length()>=limit)
                 return uncheckedString.substring(0,limit);
             else
