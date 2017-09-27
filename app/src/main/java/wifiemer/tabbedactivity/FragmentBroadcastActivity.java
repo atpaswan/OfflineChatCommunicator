@@ -54,9 +54,6 @@ public class FragmentBroadcastActivity extends Fragment{
         this.inflater=inflater;
      //   ExpandableListView listView=(ExpandableListView)rootView.findViewById(R.id.expandableListView);
 
-
-
-
         populateArrList();
         populatelistView(rootView);
 
@@ -207,6 +204,9 @@ public class FragmentBroadcastActivity extends Fragment{
                     }
 
                     String BuiltMessage=buildMessage(messages,sendingCode);
+
+                    (new WifiHotSpotAccess()).setHotspotwithName(BuiltMessage,getContext());
+                    BroadCastMessage.insertIntoDatabase(new BroadCastMessage("self", BuiltMessage,CommonVars.getPresentTime(),""),getContext());
 
                 }
             });
