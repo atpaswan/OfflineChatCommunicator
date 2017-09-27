@@ -1,0 +1,80 @@
+{
+   "typeArr":[
+      {
+         "TypeString":"HAPPY MOMENTS",
+         "codeArr":[
+            {
+               "FieldNumber":2,
+               "replacementCode":"\t",
+               "writeString":"Celebrating the \t of \t. This is the occasion of cherishing and rejoicing.",
+               "CodeNumber":1,
+               "FieldSeparator":"15_15"
+               },
+            {
+               "FieldNumber":2,
+               "replacementCode":"\t",
+               "writeString":"Today we have accomplished \t and we would like to share the occassion with you. Contact \t.s",
+               "CodeNumber":2,
+               "FieldSeparator":"15_15"
+            }
+         ]
+      },
+      {
+         "TypeString":"SAD MOMENTS",
+         "codeArr":[
+            {
+               "FieldNumber":2,
+               "replacementCode":"\t",
+               "writeString":"Today is the sad occassion of \t. We would like you to remember the contribution of \t .",
+               "CodeNumber":3,
+               "FieldSeparator":"15_15"
+            },
+            {
+               "FieldNumber":1,
+               "replacementCode":"\t",
+               "writeString":"Please do not make noises around here. A procession of \t is going on.",
+               "CodeNumber":4,
+               "FieldSeparator":"30"
+            }
+         ]
+      },
+      {
+         "TypeString":"INFORMATION",
+         "codeArr":[
+            {
+               "FieldNumber":2,
+               "replacementCode":"\t",
+               "writeString":"This is the place of \t. Visit \t for more information.",
+               "CodeNumber":5,
+               "FieldSeparator":"15_15"
+            },
+            {
+               "FieldNumber":2,
+               "replacementCode":"\t",
+               "writeString":"The Boundary of \t starts from here. Be \t .",
+               "CodeNumber":6,
+               "FieldSeparator":"15_15"
+            }
+         ]
+      },
+      {
+         "TypeString":"ADVERTISING",
+         "codeArr":[
+            {
+               "FieldNumber":3,
+               "replacementCode":"\t",
+               "writeString":"A \t sale with \t is going around here. Contact \t.",
+               "CodeNumber":7,
+               "FieldSeparator":"12_8_10"
+            },
+            {
+               "FieldNumber":2,
+               "replacementCode":"\t",
+               "writeString":"A \t has been opened here. \t is available.",
+               "CodeNumber":8,
+               "FieldSeparator":"15_15"
+            }
+         ]
+      }
+   ]
+}
