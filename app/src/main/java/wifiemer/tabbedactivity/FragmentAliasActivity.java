@@ -93,6 +93,7 @@ public class FragmentAliasActivity extends Fragment
         return aliasArrayList;
     }
 
+
     public void writeToAliasFile()
     {
         try {
@@ -110,7 +111,6 @@ public class FragmentAliasActivity extends Fragment
         }
 
     }
-
 
 
     @Override

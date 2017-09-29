@@ -39,7 +39,7 @@ public class FragmentBroadcastActivity extends Fragment{
     ArrayList<String> listHeader=new ArrayList<String>();
     HashMap<String,List<String>> childNodeList=new HashMap<String,List<String>>();
     LayoutInflater inflater;
-    List<SendingType> sendingTypeList=null;
+    List<SendingType> sendingTypeList=new ArrayList<SendingType>();
 
     public static FragmentBroadcastActivity newInstance() {
         FragmentBroadcastActivity fragment = new FragmentBroadcastActivity();
@@ -83,8 +83,13 @@ public class FragmentBroadcastActivity extends Fragment{
             while(( ch=inputStreamReader.read())!=-1)
             {
                 jSon+=(char)ch;
+               // System.out.println("read "+jSon);
             }
+            inputStreamReader.close();
+            is.close();
+
             System.out.println("jSon Read\n" + jSon);
+            System.out.println("Neglecting");
             Gson gson=new Gson();
             Type type=new TypeToken<SendingCodes>(){}.getType();
             readCodes=gson.fromJson(jSon,type);
@@ -96,8 +101,8 @@ public class FragmentBroadcastActivity extends Fragment{
             for(int i=0;i<sendingtypeArr.length;i++)
                 sendingTypeList.add(sendingtypeArr[i]);
 
-            inputStreamReader.close();
-            is.close();
+
+            System.out.println("Complete close");
         }
         catch(Exception e)
         {
