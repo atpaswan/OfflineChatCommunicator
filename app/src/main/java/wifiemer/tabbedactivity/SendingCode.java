@@ -4,6 +4,7 @@ package wifiemer.tabbedactivity;
  * Created by Atul on 9/4/2017.
  */
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by Atul on 9/2/2017.
@@ -62,5 +63,21 @@ public class SendingCode implements Serializable{
 
     public void setFieldNumber(int fieldNumber) {
         FieldNumber = fieldNumber;
+    }
+
+    public static SendingCode getSendingCode(List<SendingType> sendingTypeList,int codeNumber)
+    {
+        for (SendingType sendingtype:sendingTypeList)
+        {
+            SendingCode[] sendingCodeArr=sendingtype.getCodeArr();
+
+            for (SendingCode sendingCode:sendingCodeArr)
+            {
+                if(sendingCode.getCodeNumber()==codeNumber)
+                    return sendingCode;
+            }
+        }
+
+        return null;
     }
 }

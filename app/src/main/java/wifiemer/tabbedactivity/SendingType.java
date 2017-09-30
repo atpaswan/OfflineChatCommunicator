@@ -1,6 +1,7 @@
 package wifiemer.tabbedactivity;
 
 import android.app.Activity;
+import android.content.Context;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -15,7 +16,7 @@ import java.util.List;
 /**
  * Created by Atul on 9/4/2017.
  */
-public class SendingType extends Activity implements Serializable  {
+public class SendingType implements Serializable  {
     String TypeString;
     SendingCode[] codeArr;
 
@@ -45,9 +46,9 @@ public class SendingType extends Activity implements Serializable  {
         this.codeArr = codeArr;
     }
 
-    public  List<SendingType> getSendingTypeList()
+    public static List<SendingType> getSendingTypeList(Context context)
     {
-        InputStream is=getResources().openRawResource(R.raw.sendingcodeload);
+        InputStream is=context.getResources().openRawResource(R.raw.sendingcodeload);
         InputStreamReader inputStreamReader=new InputStreamReader(is);
 
         String jSon="";
@@ -82,20 +83,6 @@ public class SendingType extends Activity implements Serializable  {
         }
 
     }
-    
-    public static SendingCode getSendingType(List<SendingType> sendingTypeList,int codeNumber)
-    {
-        for (SendingType sendingtype:sendingTypeList)
-        {
-            SendingCode[] sendingCodeArr=sendingtype.getCodeArr();
 
-            for (SendingCode sendingCode:sendingCodeArr)
-            {
-              if(sendingCode.getCodeNumber()==codeNumber)
-                  return sendingCode;
-            }
-        }
 
-        return null;
-    }
 }

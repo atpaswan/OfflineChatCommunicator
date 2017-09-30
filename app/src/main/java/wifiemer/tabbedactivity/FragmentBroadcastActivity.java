@@ -40,6 +40,7 @@ public class FragmentBroadcastActivity extends Fragment{
     HashMap<String,List<String>> childNodeList=new HashMap<String,List<String>>();
     LayoutInflater inflater;
     List<SendingType> sendingTypeList=new ArrayList<SendingType>();
+    public boolean readList=false;
 
     public static FragmentBroadcastActivity newInstance() {
         FragmentBroadcastActivity fragment = new FragmentBroadcastActivity();
@@ -50,12 +51,20 @@ public class FragmentBroadcastActivity extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_tab3broadcast, container, false);
+        final View  rootView = inflater.inflate(R.layout.fragment_tab3broadcast, container, false);
         this.inflater=inflater;
      //   ExpandableListView listView=(ExpandableListView)rootView.findViewById(R.id.expandableListView);
 
-        populateArrList();
-        populatelistView(rootView);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                if (!readList)
+                    populateArrList();
+                populatelistView(rootView);
+            }
+        }
+        ).run();
 
         return rootView;
     }
@@ -72,43 +81,7 @@ public class FragmentBroadcastActivity extends Fragment{
     public void populateArrList()
     {
 
-        SendingCodes readCodes=null;
-        try
-        {
-            InputStream is=getResources().openRawResource(R.raw.sendingcodeload);
-            InputStreamReader inputStreamReader=new InputStreamReader(is);
-
-            String jSon="";
-            int ch;
-            while(( ch=inputStreamReader.read())!=-1)
-            {
-                jSon+=(char)ch;
-               // System.out.println("read "+jSon);
-            }
-            inputStreamReader.close();
-            is.close();
-
-            System.out.println("jSon Read\n" + jSon);
-            System.out.println("Neglecting");
-            Gson gson=new Gson();
-            Type type=new TypeToken<SendingCodes>(){}.getType();
-            readCodes=gson.fromJson(jSon,type);
-
-            SendingType[] sendingtypeArr=readCodes.getTypeArr();
-
-            sendingTypeList=new ArrayList<SendingType>();
-
-            for(int i=0;i<sendingtypeArr.length;i++)
-                sendingTypeList.add(sendingtypeArr[i]);
-
-
-            System.out.println("Complete close");
-        }
-        catch(Exception e)
-        {
-            System.out.println("can't read the sendingCodes");
-            e.printStackTrace();
-        }
+        sendingTypeList=SendingType.getSendingTypeList(getContext());
 
     }
 
@@ -176,7 +149,7 @@ public class FragmentBroadcastActivity extends Fragment{
 
             }
 
-            Button sendButton=(Button)convertView.findViewById(R.id.sendButton);
+            Button sendButton=(Button)convertView.findViewById(R.id.sendMessageButton);
             final View view=convertView;
 
             sendButton.setOnClickListener(new View.OnClickListener() {

@@ -345,9 +345,8 @@ private class WifiReceiver extends BroadcastReceiver {
         String actString=wifiString.substring(2,wifiString.length());
         int formatPos=Integer.parseInt(formatString);
 
-        List<SendingType> sendingTypeList=(new SendingType()).getSendingTypeList();
-
-        SendingCode sendingCode=SendingType.getSendingType(sendingTypeList, formatPos);
+        List<SendingType> sendingTypeList=SendingType.getSendingTypeList(getContext());
+        SendingCode sendingCode=SendingCode.getSendingCode(sendingTypeList, formatPos);
 
         String fieldSeparator=sendingCode.getFieldSeparator();
         String[] fieldSeparatorString=fieldSeparator.split("_");
