@@ -79,11 +79,7 @@ public class FragmentBroadcastActivity extends Fragment{
     }
 
     public void populateArrList()
-    {
-
-        sendingTypeList=SendingType.getSendingTypeList(getContext());
-
-    }
+    {sendingTypeList=SendingType.getSendingTypeList(getContext());}
 
 
 
@@ -163,22 +159,20 @@ public class FragmentBroadcastActivity extends Fragment{
                     for(int i=0;i<fieldCount;i++)
                     {
                         String key="";
-                        TextView textView=null;
+                        EditText editText=null;
 
                         if(i==0)
-                         textView=(TextView)view.findViewById(R.id.textView1);
+                         editText=(EditText)view.findViewById(R.id.editText1);
                         else if(i==1)
-                            textView=(TextView)view.findViewById(R.id.textView2);
+                            editText=(EditText)view.findViewById(R.id.editText2);
                         else if(i==2)
-                            textView=(TextView)view.findViewById(R.id.textView3);
+                            editText=(EditText)view.findViewById(R.id.editText3);
                         else if(i==3)
-                            textView=(TextView)view.findViewById(R.id.textView4);
-                        else if(i==4)
-                            textView=(TextView)view.findViewById(R.id.textView5);
+                            editText=(EditText)view.findViewById(R.id.editText4);
                         else
-                            textView=(TextView)view.findViewById(R.id.textView6);
+                            editText=(EditText)view.findViewById(R.id.editText5);
 
-                        key=textView.getText().toString();
+                        key=editText.getText().toString();
 
                         messages[i]=key;
                     }
@@ -199,14 +193,15 @@ public class FragmentBroadcastActivity extends Fragment{
         {
             System.out.println("Entering BuildMessage");
             int fieldCount=sendingCode.getFieldNumber();
+            int codeNumber=sendingCode.getCodeNumber();
             String[] fieldSeparator=sendingCode.getFieldSeparator().split("_");
 
             String fieldString="";
 
-            if(fieldCount<10)
-                fieldString="0"+fieldCount;
+            if(codeNumber<10)
+                fieldString="0"+codeNumber;
             else
-            fieldString=fieldCount+"";
+            fieldString=codeNumber+"";
 
             String builtMessage=fieldString+"";
 
@@ -229,7 +224,7 @@ public class FragmentBroadcastActivity extends Fragment{
                 int remLen=limit-uncheckedString.length();
                 String padString="";
                 for(int i=1;i<=remLen;i++)
-                    padString+="\n";
+                    padString+=CommonVars.fillerChar;
 
                 uncheckedString+=padString;
 

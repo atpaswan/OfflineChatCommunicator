@@ -27,6 +27,7 @@ public class CommonVars {
     public static List<BroadCastMessage> broadCastMessageList=new ArrayList<BroadCastMessage>();
     public static String defaultDateFormat="yyyy-MM-dd hh:mm:ss";
     public static String macID="macID";
+    public static char fillerChar='\'';
 
     public static String getPresentTime()
     {

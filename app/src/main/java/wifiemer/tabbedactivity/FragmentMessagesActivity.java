@@ -364,18 +364,18 @@ private class WifiReceiver extends BroadcastReceiver {
 
         for(int i=0;i<fieldSeparatorInt.length;i++)
         {
-           fieldString[i]=wifiString.substring(lastCurr,fieldSeparatorInt[i]);
+           fieldString[i]=actString.substring(lastCurr,fieldSeparatorInt[i]);
             lastCurr+=fieldSeparatorInt[i];
 
-            String ignoredString="";
+            String saneString="";
 
             for(int j=0;j<fieldString[i].length();j++)
             {
-                if(fieldString[i].charAt(j)!='\n')
-                    ignoredString+=fieldString[i].charAt(j);
+                if(fieldString[i].charAt(j)!=CommonVars.fillerChar)
+                    saneString+=fieldString[i].charAt(j);
             }
 
-            fieldString[i]=ignoredString;
+            fieldString[i]=saneString;
         }
 
         String writeString=sendingCode.getWriteString();
@@ -394,6 +394,7 @@ private class WifiReceiver extends BroadcastReceiver {
             }
         }
 
+        System.out.println("resultString: "+resultString);
 
         return resultString;
     }
