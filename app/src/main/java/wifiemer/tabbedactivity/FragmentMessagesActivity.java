@@ -341,8 +341,10 @@ private class WifiReceiver extends BroadcastReceiver {
 
     public String extractMessage(String wifiString)
     {
-        String formatString=wifiString.charAt(0)+wifiString.charAt(1)+"";
+        String formatString=wifiString.substring(0,2);
         String actString=wifiString.substring(2,wifiString.length());
+
+        System.out.println("checker" + formatString);
         int formatPos=Integer.parseInt(formatString);
 
         List<SendingType> sendingTypeList=SendingType.getSendingTypeList(getContext());
