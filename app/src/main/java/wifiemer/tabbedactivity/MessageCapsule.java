@@ -9,12 +9,18 @@ public class MessageCapsule {
     String message;
     String type;
     Byte[] rawData;
+    String SEQ;
+    int partNum;
+    int totParts;
 
-    public MessageCapsule(String macID, String message, String type, Byte[] rawData) {
+    public MessageCapsule(String macID, String message, String type, Byte[] rawData,String SEQ,int partNum,int totParts) {
         this.macID = macID;
         this.message = message;
         this.type = type;
         this.rawData = rawData;
+        this.SEQ=SEQ;
+        this.partNum=partNum;
+        this.totParts=totParts;
     }
 
     public String getMacID() {
@@ -47,5 +53,29 @@ public class MessageCapsule {
 
     public void setRawData(Byte[] rawData) {
         this.rawData = rawData;
+    }
+
+    public String getSEQ() {
+        return SEQ;
+    }
+
+    public void setSEQ(String SEQ) {
+        this.SEQ = SEQ;
+    }
+
+    public int getPartNum() {
+        return partNum;
+    }
+
+    public void setPartNum(int partNum) {
+        this.partNum = partNum;
+    }
+
+    public int getTotParts() {
+        return totParts;
+    }
+
+    public void setTotParts(int totParts) {
+        this.totParts = totParts;
     }
 }

@@ -2,6 +2,7 @@ package wifiemer.tabbedactivity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -57,7 +58,7 @@ public class SendingType implements Serializable  {
             while ((ch = inputStreamReader.read()) != -1) {
                 jSon += (char) ch;
             }
-            System.out.println("jSon Read\n" + jSon);
+            Log.d("TAGGER","jSon Read\n" + jSon);
             Gson gson = new Gson();
             Type type = new TypeToken<SendingCodes>() {
             }.getType();
