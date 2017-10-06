@@ -1,9 +1,11 @@
 package wifiemer.tabbedactivity;
 
+import java.io.Serializable;
+
 /**
  * Created by Atul on 10/6/2017.
  */
-public class MessageCapsule {
+public class MessageCapsule implements Serializable {
 
     String macID;
     String message;
