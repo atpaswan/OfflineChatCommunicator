@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -205,7 +206,9 @@ public class ChatCommunicator {
 
               try {
 
-                    Socket socket = new Socket(wifiHotSpot, portNumber);
+                  Socket socket=null;
+
+                  socket = new Socket(wifiHotSpot, portNumber);
 
 
                     PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
@@ -225,6 +228,54 @@ public class ChatCommunicator {
                 }
 
             }
+
+    public boolean WriteToServer(final String WriteString,final int[] portNumber) // this will try to make connections to the server on a range of ports
+    {
+
+        Socket socket=null;
+
+        try{
+
+            for(int i=0;i<portNumber.length;i++)
+            {
+                try {
+                    socket = new Socket(wifiHotSpot, portNumber[i]);
+                }
+                catch (BindException e)
+                {
+                  System.out.println("BindException , Socket not created");
+                }
+                catch(Exception e)
+                {
+                    System.out.println("other exceptions other than BindException");
+                }
+
+                if(socket!=null)
+                    break;
+
+            }
+
+            if(socket==null)
+                throw new Exception("Not able to create socket");
+
+            PrintWriter printWriter=new PrintWriter(socket.getOutputStream());
+
+            printWriter.println(WriteString);
+
+            printWriter.close();
+            socket.close();
+
+            return true;
+        }
+        catch (Exception e)
+        {
+
+            System.out.println("catching socket exception in WritetoServer");
+            e.printStackTrace();
+            return  false;
+        }
+
+    }
 
 
 
