@@ -229,7 +229,7 @@ public class ChatCommunicator {
 
             }
 
-    public boolean WriteToServer(final String WriteString,final int[] portNumber) // this will try to make connections to the server on a range of ports
+    public int WriteToServer(final String WriteString,final int[] portNumber) // this will try to make connections to the server on a range of ports
     {
 
         Socket socket=null;
@@ -265,14 +265,14 @@ public class ChatCommunicator {
             printWriter.close();
             socket.close();
 
-            return true;
+            return socket.getPort();
         }
         catch (Exception e)
         {
 
             System.out.println("catching socket exception in WritetoServer");
             e.printStackTrace();
-            return  false;
+            return  -1;
         }
 
     }
@@ -316,7 +316,7 @@ public class ChatCommunicator {
         }
     }
 
-    public void ReadFromServer(final TextView readTextView,final int portNumber) {
+    public String ReadFromServer(final int portNumber) {
         System.out.println("triggering readfromServer");
 
 
@@ -331,23 +331,35 @@ public class ChatCommunicator {
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
                 final String readString = bufferedReader.readLine();
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        readTextView.setText(readString);
-                    }
-                });
+
                 System.out.println("before closing socket");
                 socket.close();
                 System.out.println("readfrom Server complete");
 
+                return readString;
+
             } catch (Exception e) {
                 System.out.println("readfromServer exception");
                 e.printStackTrace();
+                return "";
 
             }
         }
 
+
+    }
+
+    public String ReadFromServer(final int[] portNumber) throws Exception {
+
+            String firstCall="";
+            int connectPort=WriteToServer(firstCall,portNumber);
+            if(connectPort!=-1)
+            {
+                String readString=readFromServer(connectPort);
+                return readString;
+            }
+            else
+                throw new Exception("Can't connect to the port of the server");
 
     }
 
