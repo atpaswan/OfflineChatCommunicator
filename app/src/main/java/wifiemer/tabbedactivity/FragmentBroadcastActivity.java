@@ -182,6 +182,15 @@ public class FragmentBroadcastActivity extends Fragment{
                     (new WifiHotSpotAccess()).setHotspotwithName(BuiltMessage,getContext());
                     BroadCastMessage.insertIntoDatabase(new BroadCastMessage("self", BuiltMessage,CommonVars.getPresentTime(),""),getContext());
 
+                    /** starting the Server for listening and sending the messages */
+
+                    Intent outgoingIntent=new Intent(getContext(),CheckOutgoingServiceServer.class);
+                    getContext().startService(outgoingIntent);
+
+                    Intent incomingIntent=new Intent(getContext(),CheckIncomingServiceServer.class);
+                    getContext().startService(incomingIntent);
+
+
                 }
             });
 

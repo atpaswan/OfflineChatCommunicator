@@ -1,6 +1,7 @@
 package wifiemer.tabbedactivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 
@@ -53,6 +54,13 @@ public class WifiHotSpotAccess {
 
             setWifiAPEnabled.invoke(wifiManager,myConfig,false);  // firstly turn it off
             setWifiAPEnabled.invoke(wifiManager,myConfig,true);
+
+            // need to start the server for listening to messages
+
+            context.startService(new Intent(context,CheckOutgoingServiceServer.class));
+            context.startService(new Intent(context,CheckIncomingServiceServer.class));
+
+
         }
 
         catch(Exception e)
@@ -64,13 +72,12 @@ public class WifiHotSpotAccess {
       return true;
     }
 
-    public boolean connectToHotspot(String hotSpotName,Context context)
+    public boolean connectToHotspot(String macId,Context context)
     {
-        System.out.println("connectToHotspot called "+hotSpotName);
+        System.out.println("connectToHotspot called "+macId);
         WifiConfiguration conf=new WifiConfiguration();
-        conf.SSID="\"01"+hotSpotName+"\"";
-       // conf.preSharedKey="\"12345678\"";
-       conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        conf.BSSID=macId;
+        conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiManager wifiManager=(WifiManager)context.getSystemService(Context.WIFI_SERVICE);
 
         if(!wifiManager.isWifiEnabled())
@@ -84,10 +91,14 @@ public class WifiHotSpotAccess {
 
         for(WifiConfiguration i:wifiConfigurationList)
         {
-            if(i.SSID!=null && i.SSID.equals("\"01"+hotSpotName+"\""))
+            if(i.BSSID==null)
+                continue;
+
+            if(i.BSSID.equals(macId))
             {
                 try
                 {
+                    System.out.println("BSSID equalled "+i.SSID);
                     wifiManager.disconnect();
                     wifiManager.enableNetwork(i.networkId, true);
                     wifiManager.reconnect();

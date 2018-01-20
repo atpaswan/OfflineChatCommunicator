@@ -38,9 +38,9 @@ public class BroadcastChatActivity extends Activity {
 
                 while(true) {
                     ChatCommunicator chatCommunicator = new ChatCommunicator("", activity);
-                    String readString = chatCommunicator.readFromClient(1087);
+                    String readString = "";
 
-                     ChatMessage chatMessage = new ChatMessage(macID, DataType.TEXT, null, readString, ReadCondition.NOT_SEEN, CommonVars.getPresentTime(), 'L');
+                     ChatMessage chatMessage = new ChatMessage(macID, CommonVars.usageId,DataType.TEXT, null, readString, ReadCondition.NOT_SEEN, CommonVars.getPresentTime(), 'L');
                     chatMessageList.add(chatMessage);
                     runOnUiThread(new Runnable() {
                                       @Override
@@ -70,7 +70,7 @@ public class BroadcastChatActivity extends Activity {
                         String writeString=sendEditText.getText().toString();
                         //sendEditText.clearComposingText();
 
-                        boolean result=chatCommunicator.writeToClient(writeString,1086);
+                        boolean result=true;
                         ReadCondition readCondition;
                         if(result)
                         {
@@ -81,7 +81,7 @@ public class BroadcastChatActivity extends Activity {
                             System.out.println("writetoClient failed");
                             readCondition=ReadCondition.NOT_SENT;
                         }
-                        final ChatMessage chatMessage=new ChatMessage(macID,  DataType.TEXT,null,writeString,readCondition, CommonVars.getPresentTime(),'R');
+                        final ChatMessage chatMessage=new ChatMessage(macID,CommonVars.usageId,DataType.TEXT,null,writeString,readCondition, CommonVars.getPresentTime(),'R');
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

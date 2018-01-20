@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -65,6 +66,14 @@ public class FragmentMessagesActivity extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        CommonVars.context=getContext();
+
+        WifiManager wifiManager=(WifiManager)getContext().getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo=wifiManager.getConnectionInfo();
+
+        System.out.println("macID checker "+wifiInfo.getMacAddress()+" , "+wifiInfo.getBSSID());
+        System.out.println("New MacID checker "+CommonVars.getMacAddr());
+
         if(CommonVars.messageActivity) {
             senderDeviceList = CommonVars.senderDeviceList;
             broadCastMessageList = CommonVars.broadCastMessageList;
@@ -77,9 +86,10 @@ public class FragmentMessagesActivity extends Fragment {
                 SQLiteDatabase sqLiteDatabase=getContext().openOrCreateDatabase(CommonSettings.appDatabase, getActivity().MODE_PRIVATE, null);
 
                 sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS SENDER_DEVICE(MACID VARCHAR,IMAGEBYTES BLOB,ALIASNAME VARCHAR);");
-                sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS CHATMESSAGE(MACID VARCHAR,DATATYPE VARCHAR,DATA BLOB,MESSAGE VARCHAR,READCONDITION VARCHAR,TIMESTAMP VARCHAR,CHATTYPE CHAR);");
+                sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS CHATMESSAGE(MACID VARCHAR,USAGEID VARCHAR,DATATYPE VARCHAR,DATA BLOB,MESSAGE VARCHAR,READCONDITION VARCHAR,TIMESTAMP VARCHAR,CHATTYPE CHAR);");
                 sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS BROADCASTMESSAGE(MACID VARCHAR,MESSAGE VARCHAR,REC_TIMESTAMP TIMESTAMP,UNENCSTRING VARCHAR);");
-
+                //sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS MESSAGECAPSULE(MACID VARCHAR,MESSAGE VARCHAR,DATATYPE VARCHAR,RAWDATA BLOB,SEQ VARCHAR,PARTNUM INTEGER,TOTPARTS INTEGER,MSGCODE VARCHAR");
+                sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS CHATUNSENT(MACID VARCHAR,USAGEID VARCHAR,DATATYPE VARCHAR,DATA BLOB,MESSAGE VARCHAR,READCONDITION VARCHAR,TIMESTAMP VARCHAR,CHATTYPE CHAR);");
 
                 Cursor senderDeviceCursor=sqLiteDatabase.rawQuery("select * from sender_device",null);
               //  Cursor broadCastMessageCursor=sqLiteDatabase.rawQuery("select * from broadcastmessage",null);
@@ -280,10 +290,10 @@ private class WifiReceiver extends BroadcastReceiver {
 
                             byte[] decryptBytes = (new CryptEncrypt()).Decrypt(encryptBytes);
                             wifiString = new String(decryptBytes);
-                            System.out.println("tryExecute");
+                            //System.out.println("tryExecute");
                             addFlag = true;
                         } catch (Exception e) {
-                            System.out.println("padding Exception " + wifiString);
+                            //System.out.println("padding Exception " + wifiString);
                         }
 
                         if(isMessage(wifiString)) {                   // needs refinement, not the final prod version
@@ -310,7 +320,14 @@ private class WifiReceiver extends BroadcastReceiver {
                         }
                     }
 
-                    System.out.println("setting progress");
+                    //System.out.println("setting progress");
+                    try {
+                        Thread.sleep(2000);
+                    }
+                    catch(Exception e)
+                    {
+                        e.printStackTrace();
+                    }
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

@@ -57,7 +57,7 @@ public class FragmentReceivedBroadcastActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
-                intent.putExtra(CommonVars.macID, macID);
+                intent.putExtra("macID", macID);
                 startActivity(intent);
 
             }

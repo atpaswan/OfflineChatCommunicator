@@ -33,7 +33,24 @@
         <activity android:name=".ChatActivity" />
         <activity android:name=".BroadcastDiscussActivity" />
         <activity android:name=".BroadcastSenderActivity" />
-        <activity android:name=".BroadcastChatActivity"></activity>
+        <activity android:name=".BroadcastChatActivity" />
+
+        <service
+            android:name=".CheckOutgoingServiceServer"
+            android:enabled="true"
+            android:exported="true"></service>
+
+        <service android:name=".CheckOutgoingServiceClient"
+            android:enabled="true"
+            android:exported="true"></service>
+
+        <service android:name=".CheckIncomingServiceClient"
+            android:enabled="true"
+            android:exported="true"></service>
+
+        <service android:name=".CheckIncomingServiceServer"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

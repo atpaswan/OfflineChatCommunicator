@@ -7,7 +7,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Message;
 import android.widget.TextView;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.w3c.dom.Text;
 
@@ -15,12 +19,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.BindException;
+import java.net.MulticastSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.reflect.Type;
 
 /**
  * Created by Atul on 5/21/2017.
@@ -29,6 +37,11 @@ public class ChatCommunicator {
 
 
     private String wifiHotSpot = "";
+    private Activity activity;
+    List<ScanResult> scanResultList=new ArrayList<ScanResult>();
+    boolean scanAvailable=false;
+    WifiManager wifiManager;
+
 
     public Activity getActivity() {
         return activity;
@@ -70,11 +83,6 @@ public class ChatCommunicator {
         this.wifiManager = wifiManager;
     }
 
-    private Activity activity;
-    List<ScanResult> scanResultList=new ArrayList<ScanResult>();
-    boolean scanAvailable=false;
-    WifiManager wifiManager;
-
     public ChatCommunicator(String wifiHotSpot,Activity activity) {
 
             this.wifiHotSpot = wifiHotSpot;
@@ -85,199 +93,6 @@ public class ChatCommunicator {
         this.activity=activity;
 
     }
-
-    public void readFromClient(final TextView textView,final int portNumber) {
-
-        System.out.println("triggering readfromClient");
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-
-
-
-                    while (true) {
-
-                           ServerSocket serverSocket = new ServerSocket(portNumber);
-                           Socket socket = serverSocket.accept();
-
-                        System.out.println("accepting socket info");
-                        try {
-                            InputStream inputStream = socket.getInputStream();
-                            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-                            final String result = br.readLine();
-                            System.out.println("readString " + result);
-
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-
-                                    textView.setText(result);
-                                }
-                            });
-                            socket.close();
-                            serverSocket.close();
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            System.out.println("Exception in getting the string from the client");
-                            //return "Exception in getting the string from the client";
-                        }
-                    }
-                } catch (Exception e) {
-                    System.out.println("Throwing the second error. Catch !!!!");
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
-
-    }
-
-    public String readFromClient(final int portNumber) {
-
-        System.out.println("triggering readfromClient");
-
-
-        try {
-
-                        ServerSocket serverSocket = new ServerSocket(portNumber);
-                        Socket socket = serverSocket.accept();
-
-                        System.out.println("accepting socket info");
-                        try {
-                            InputStream inputStream = socket.getInputStream();
-                            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-                            final String result = br.readLine();
-                            System.out.println("readString " + result);
-
-                            socket.close();
-                            serverSocket.close();
-                            return result;
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            System.out.println("Exception in getting the string from the client");
-                            return "";
-                        }
-
-                } catch (Exception e) {
-                    System.out.println("Throwing the second error. Catch !!!!");
-                    e.printStackTrace();
-                    return "";
-                }
-
-    }
-
-    public boolean writeToClient(String writeString,final int portNumber) {
-        System.out.println("triggering writeToClient");
-
-        try {
-
-            ServerSocket serverSocket = new ServerSocket(portNumber);
-
-                Socket socket = serverSocket.accept();
-
-            System.out.println("accepting socket info");
-
-            PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
-
-            printWriter.println(writeString);
-            printWriter.close();
-            socket.close();
-            serverSocket.close();
-
-            return  true;
-        } catch (Exception e) {
-            System.out.println("writeToClient exception");
-            e.printStackTrace();
-            return false;
-        }
-
-
-    }
-
-
-    public boolean WriteToServer(final String writeString,final int portNumber) {
-
-        System.out.println("triggering writeToServer " + writeString);
-
-              try {
-
-                  Socket socket=null;
-
-                  socket = new Socket(wifiHotSpot, portNumber);
-
-
-                    PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
-
-                    printWriter.println(writeString);
-                    printWriter.close();
-                    System.out.println("WritetoServer Complete");
-                    socket.close();
-
-                    return true;
-
-                } catch (Exception e) {
-                    System.out.println("error in writing to the server");
-                    e.printStackTrace();
-
-                  return false;
-                }
-
-            }
-
-    public int WriteToServer(final String WriteString,final int[] portNumber) // this will try to make connections to the server on a range of ports
-    {
-
-        Socket socket=null;
-
-        try{
-
-            for(int i=0;i<portNumber.length;i++)
-            {
-                try {
-                    socket = new Socket(wifiHotSpot, portNumber[i]);
-                }
-                catch (BindException e)
-                {
-                  System.out.println("BindException , Socket not created");
-                }
-                catch(Exception e)
-                {
-                    System.out.println("other exceptions other than BindException");
-                }
-
-                if(socket!=null)
-                    break;
-
-            }
-
-            if(socket==null)
-                throw new Exception("Not able to create socket");
-
-            PrintWriter printWriter=new PrintWriter(socket.getOutputStream());
-
-            printWriter.println(WriteString);
-
-            printWriter.close();
-            socket.close();
-
-            return socket.getPort();
-        }
-        catch (Exception e)
-        {
-
-            System.out.println("catching socket exception in WritetoServer");
-            e.printStackTrace();
-            return  -1;
-        }
-
-    }
-
-
 
     public String getWifiName(String macID,Context context)
     {
@@ -303,7 +118,6 @@ public class ChatCommunicator {
         return "";
     }
 
-
     private class WifiReceiver extends BroadcastReceiver
     {
         @Override
@@ -316,80 +130,118 @@ public class ChatCommunicator {
         }
     }
 
-    public String ReadFromServer(final int portNumber) {
-        System.out.println("triggering readfromServer");
+    public boolean writeToServer(String objectJson)
+    {
 
+        CommonVars.fillWritePortNumber();
+        int[] portNumber=CommonVars.writePortNumber;
+        Socket socket=null;
 
-
-        while (true) {
-            try {
-
-                Socket socket = new Socket(wifiHotSpot, portNumber);
-
-                InputStream inputStream = socket.getInputStream();
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-                final String readString = bufferedReader.readLine();
-
-                System.out.println("before closing socket");
-                socket.close();
-                System.out.println("readfrom Server complete");
-
-                return readString;
-
-            } catch (Exception e) {
-                System.out.println("readfromServer exception");
+        for(int i=0;i<portNumber.length;i++)
+        {
+            try
+            {
+                socket=new Socket(wifiHotSpot,portNumber[i]);
+                break;
+            }
+            catch (Exception e)
+            {
                 e.printStackTrace();
-                return "";
-
             }
         }
 
+        if(socket==null)
+            return false;
 
-    }
-
-    public String ReadFromServer(final int[] portNumber) throws Exception {
-
-            String firstCall="";
-            int connectPort=WriteToServer(firstCall,portNumber);
-            if(connectPort!=-1)
-            {
-                String readString=readFromServer(connectPort);
-                return readString;
-            }
-            else
-                throw new Exception("Can't connect to the port of the server");
-
-    }
-
-    public String readFromServer(final int portNumber) {
-        System.out.println("triggering readfromServer");
-
-        Socket socket=null;
+        String totStringwithID=objectJson;
 
         try {
+            OutputStream outputStream = socket.getOutputStream();
+            PrintWriter printWriter = new PrintWriter(outputStream);
 
-                 socket = new Socket(wifiHotSpot, portNumber);
+            printWriter.println(totStringwithID);
+            printWriter.close();
+            outputStream.close();
+            socket.close();
 
-                InputStream inputStream = socket.getInputStream();
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            return  true;
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
 
-                final String readString = bufferedReader.readLine();
-                System.out.println("before closing socket");
-                socket.close();
-                System.out.println("readfrom Server complete");
+        return false;
 
-                return  readString;
-
-            } catch (Exception e) {
-                System.out.println("readfromServer exception");
-               // e.printStackTrace();
-                return "";
-
-            }
 
     }
+
+    public String readFromServer()  throws Exception
+    {
+
+        CommonVars.fillReadPortNumber();
+        int[] portNumber=CommonVars.readPortNumber;
+        Socket socket=null;
+
+        for(int i=0;i<portNumber.length;i++)   // connecting through a socket to the server for making a communication
+        {
+            try {
+                socket = new Socket(wifiHotSpot, portNumber[i]);
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+                System.out.println("Exception in opening socket for reading from the server");
+            }
+
+            if(socket!=null)
+                break;
+        }
+
+        if(socket==null)
+            throw new Exception("Not able to connect to any of the socket");
+
+        OutputStream outputStream=socket.getOutputStream();
+        PrintWriter printWriter=new PrintWriter(outputStream);
+
+        printWriter.println(CommonVars.macID + ":" + CommonVars.usageId);
+
+        InputStream inputStream=socket.getInputStream();
+        InputStreamReader inputStreamreader=new InputStreamReader(inputStream);
+        BufferedReader br=new BufferedReader(inputStreamreader);
+
+        String responseJson="";
+        String currLine="";
+
+        while((currLine=br.readLine())!=null)
+        {
+            responseJson+=currLine;
+        }
+
+        inputStream.close();
+        socket.close();
+
+        return responseJson;
+
+    }
+
+    public static List<ChatMessage> readfromClient(String macId,String usageId)
+    {
+        List<ChatMessage> chatMessageList=ChatMessage.getChatMessageList("select * from chatmessage where macId='"+macId+"' and usageId='"+usageId+"' where readcondition='QUEUED' ;",CommonVars.context);
+        return chatMessageList;
+    }
+
+    public static void writetoClient(List<ChatMessage> chatMessageList)
+
+    {
+        for(int i=0;i<chatMessageList.size();i++)           // inserting into the queue for writing it later throught the WriteService
+        {
+            ChatMessage chatMessage=chatMessageList.get(i);
+            chatMessage.setReadCondition(ReadCondition.NOT_SENT);
+
+            ChatMessage.insertIntoDatabase(chatMessage,CommonVars.context);
+        }
+    }
+
 
 }
