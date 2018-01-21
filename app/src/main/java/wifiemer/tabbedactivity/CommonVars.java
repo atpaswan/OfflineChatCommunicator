@@ -38,6 +38,7 @@ public class CommonVars {
     public static int[] writePortNumber=null;
     public static String usageId="";
     public static Context context=null;
+    public static boolean debugMode=false;
 
 
     public static String getPresentTime()

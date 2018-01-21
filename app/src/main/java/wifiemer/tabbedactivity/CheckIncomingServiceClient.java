@@ -55,7 +55,7 @@ public class CheckIncomingServiceClient extends Service {
                             InputStream inputStream=socket.getInputStream();
                             PrintWriter printWriter = new PrintWriter(outputStream);
 
-                            printWriter.println(CommonVars.getMacAddr() + ":" + CommonVars.usageId);
+                            printWriter.println(CommonVars.getMacAddr() + ":" + CommonVars.usageId+" ");
                             if(printWriter.checkError())
                                 System.out.println("PrintWriter has error");
 
@@ -68,9 +68,11 @@ public class CheckIncomingServiceClient extends Service {
                             String json = "";
 
                                 System.out.println("Before reading the response ");
-                            while ((currLine = br.readLine()) != null) {
+                          /*  while ((currLine = br.readLine()) != null) {
                                 json += currLine;
                             }
+                            */
+                            json=br.readLine();
 
                             System.out.println("json"+json);
 

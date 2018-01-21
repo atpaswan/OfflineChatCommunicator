@@ -74,9 +74,9 @@ public class CheckOutgoingServiceServer extends Service {
                                 if(chatMessageList.size()>0)
                                 printWriter.println(ChatMessage.convertListToJson(chatMessageList));
                                 else
-                                printWriter.println("EMPTY_RESPONSE");
+                                printWriter.println("EMPTY_RESPONSE\n");
 
-                                System.out.println("CheckOutgoingServer wrote the outputstream");
+                                System.out.println("CheckOutgoingServer wrote the outputstream"+ chatMessageList.size());
 
                                 ChatMessage.executeQuery("update chatmessage set readcondition='SENT' where readcondition='NOT_SENT' and macId='"+macID+"';", getApplicationContext());
 
