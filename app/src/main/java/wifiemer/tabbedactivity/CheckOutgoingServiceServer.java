@@ -45,6 +45,7 @@ public class CheckOutgoingServiceServer extends Service {
                                 Socket socket = serverSocket.accept();
 
                                 InputStream inputStream = socket.getInputStream();
+                                OutputStream outputStream=socket.getOutputStream();
 
                                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                                 BufferedReader br = new BufferedReader(inputStreamReader);
@@ -58,17 +59,16 @@ public class CheckOutgoingServiceServer extends Service {
 
                                 System.out.println("received the info request "+currLine);
 
-                                String[] infoID = currLine.split(":");
+                                String[] infoID = currLine.split(";");
 
                                 String macID = infoID[0];
                                 String usageID = infoID[1];
 
-                                System.out.println("CheckOutgoingServer accepted firstInputStream "+infoID[0]+","+infoID[1]);
+                                System.out.println("CheckOutgoingServer accepted firstInputStream "+infoID[0].toString()+","+infoID[1].toString());
 
                                 List<ChatMessage> chatMessageList = ChatMessage.getChatMessageList("select * from chatmessage where macId='" + macID + "' and readcondition='NOT_SENT';", getApplicationContext());
                                 chatMessageList = ChatMessage.modifyList(chatMessageList, CommonVars.getMacAddr(), CommonVars.usageId);
 
-                                OutputStream outputStream=socket.getOutputStream();
                                 PrintWriter printWriter = new PrintWriter(outputStream);
 
                                 if(chatMessageList.size()>0)
@@ -76,7 +76,7 @@ public class CheckOutgoingServiceServer extends Service {
                                 else
                                 printWriter.println("EMPTY_RESPONSE\n");
 
-                                System.out.println("CheckOutgoingServer wrote the outputstream"+ chatMessageList.size());
+                                System.out.println("CheckOutgoingServer wrote the outputstream "+ chatMessageList.size());
 
                                 ChatMessage.executeQuery("update chatmessage set readcondition='SENT' where readcondition='NOT_SENT' and macId='"+macID+"';", getApplicationContext());
 
