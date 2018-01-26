@@ -79,11 +79,13 @@ public class CheckOutgoingServiceServer extends Service {
 
                                 printWriter.flush();
 
-                                System.out.println("CheckOutgoingServer wrote the outputstream "+ chatMessageList.size());
+                                System.out.println("CheckOutgoingServer wrote the outputstream " + chatMessageList.size());
 
                                 ChatMessage.executeQuery("update chatmessage set readcondition='SENT' where readcondition='NOT_SENT' and macId='" + macID + "';", getApplicationContext());
 
 
+                                inputStream.close();
+                                outputStream.close();
                                 socket.close();
                                 serverSocket.close();
 
