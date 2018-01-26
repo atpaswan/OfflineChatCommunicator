@@ -54,8 +54,10 @@ public class CheckIncomingServiceClient extends Service {
                             OutputStream outputStream = socket.getOutputStream();
                             InputStream inputStream=socket.getInputStream();
                             PrintWriter printWriter = new PrintWriter(outputStream);
+                            printWriter.flush();
 
                             printWriter.println(CommonVars.getMacAddr() + ";" + CommonVars.usageId+" ");
+
                             if(printWriter.checkError())
                                 System.out.println("PrintWriter has error");
 
@@ -88,8 +90,6 @@ public class CheckIncomingServiceClient extends Service {
                             else
                             System.out.println("jSon equals empty response");
 
-                            inputStream.close();
-                            outputStream.close();
                             socket.close();
 
                         } catch (Exception e) {

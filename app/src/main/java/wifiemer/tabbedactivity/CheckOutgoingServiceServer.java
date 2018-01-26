@@ -70,18 +70,20 @@ public class CheckOutgoingServiceServer extends Service {
                                 chatMessageList = ChatMessage.modifyList(chatMessageList, CommonVars.getMacAddr(), CommonVars.usageId);
 
                                 PrintWriter printWriter = new PrintWriter(outputStream);
+                                printWriter.flush();
 
                                 if(chatMessageList.size()>0)
                                 printWriter.println(ChatMessage.convertListToJson(chatMessageList));
                                 else
                                 printWriter.println("EMPTY_RESPONSE\n");
 
+                                printWriter.flush();
+
                                 System.out.println("CheckOutgoingServer wrote the outputstream "+ chatMessageList.size());
 
-                                ChatMessage.executeQuery("update chatmessage set readcondition='SENT' where readcondition='NOT_SENT' and macId='"+macID+"';", getApplicationContext());
+                                ChatMessage.executeQuery("update chatmessage set readcondition='SENT' where readcondition='NOT_SENT' and macId='" + macID + "';", getApplicationContext());
 
-                                inputStream.close();
-                                outputStream.close();
+
                                 socket.close();
                                 serverSocket.close();
 
